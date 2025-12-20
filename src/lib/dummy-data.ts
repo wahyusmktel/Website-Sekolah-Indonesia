@@ -210,6 +210,69 @@ export const galeriList = [
   { id: 8, title: "Olahraga Bersama", category: "Ekstrakurikuler", image: "/placeholder.svg" },
 ];
 
+export const albumList = [
+  {
+    id: 1,
+    slug: "wisuda-2023",
+    title: "Wisuda Angkatan 2023",
+    coverImage: "https://images.unsplash.com/photo-1523050335456-c3cc73c68326?auto=format&fit=crop&q=80&w=800",
+    category: "Kegiatan",
+    date: "2023-05-25",
+    description: "Momen membanggakan pelepasan siswa-siswi SMK Nusantara angkatan ke-25.",
+    items: [
+      { id: 1, title: "Prosesi Wisuda", image: "https://images.unsplash.com/photo-1523050335456-c3cc73c68326?auto=format&fit=crop&q=80&w=800" },
+      { id: 2, title: "Pemberian Piagam", image: "https://images.unsplash.com/photo-1541339907198-e08759dfc3f0?auto=format&fit=crop&q=80&w=800" },
+      { id: 3, title: "Foto Bersama Guru", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800" },
+      { id: 4, title: "Keceriaan Wisudawan", image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800" },
+    ]
+  },
+  {
+    id: 2,
+    slug: "lks-nasional-2024",
+    title: "LKS Nasional 2024",
+    coverImage: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=800",
+    category: "Prestasi",
+    date: "2024-02-15",
+    description: "Dokumentasi perjuangan siswa SMK Nusantara dalam ajang Lomba Kompetensi Siswa tingkat Nasional.",
+    items: [
+      { id: 5, title: "Persiapan Lomba", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=800" },
+      { id: 6, title: "Presentasi Karya", image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800" },
+      { id: 7, title: "Penilaian Juri", image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" },
+      { id: 8, title: "Pengumuman Juara", image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&q=80&w=800" },
+    ]
+  },
+  {
+    id: 3,
+    slug: "praktik-industri-tjat",
+    title: "Praktik Industri TJAT",
+    coverImage: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=800",
+    category: "Pembelajaran",
+    date: "2024-01-20",
+    description: "Kegiatan praktik lapangan siswa jurusan Teknik Jaringan Akses Telekomunikasi di mitra industri.",
+    items: [
+      { id: 9, title: "Instalasi Fiber Optik", image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=800" },
+      { id: 10, title: "Konfigurasi Perangkat", image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=800" },
+      { id: 11, title: "Pengecekan Jaringan", image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800" },
+      { id: 12, title: "Diskusi Teknis", image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800" },
+    ]
+  },
+  {
+    id: 4,
+    slug: "pentas-seni-budaya",
+    title: "Pentas Seni Budaya",
+    coverImage: "https://images.unsplash.com/photo-1514525253344-f81fbd67b551?auto=format&fit=crop&q=80&w=800",
+    category: "Ekstrakurikuler",
+    date: "2023-11-10",
+    description: "Pertunjukan bakat dan kreativitas siswa dalam melestarikan budaya nusantara.",
+    items: [
+      { id: 13, title: "Tari Tradisional", image: "https://images.unsplash.com/photo-1514525253344-f81fbd67b551?auto=format&fit=crop&q=80&w=800" },
+      { id: 14, title: "Band Sekolah", image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=800" },
+      { id: 15, title: "Teater", image: "https://images.unsplash.com/photo-1503095396549-807a8bc3667c?auto=format&fit=crop&q=80&w=800" },
+      { id: 16, title: "Pameran Lukisan", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800" },
+    ]
+  }
+];
+
 // Testimoni
 export const testimoniList = [
   {
@@ -263,11 +326,11 @@ export const infoSekolah = {
 
 // Timeline PPDB
 export const ppdbTimeline = [
-  { step: 1, title: "Pendaftaran Online", date: "1 Feb - 31 Maret 2024", description: "Isi formulir pendaftaran online" },
-  { step: 2, title: "Verifikasi Berkas", date: "1 - 15 April 2024", description: "Verifikasi dokumen pendaftaran" },
-  { step: 3, title: "Tes Seleksi", date: "20 - 22 April 2024", description: "Tes akademik dan wawancara" },
-  { step: 4, title: "Pengumuman", date: "1 Mei 2024", description: "Pengumuman hasil seleksi" },
-  { step: 5, title: "Daftar Ulang", date: "5 - 15 Mei 2024", description: "Pembayaran dan daftar ulang" },
+  { step: 1, title: "Gelombang 1: Early Bird", date: "Januari - Maret 2026", description: "Potongan biaya khusus bagi pendaftar awal dan prestasi akademik." },
+  { step: 2, title: "Gelombang 2: Reguler", date: "April - Juni 2026", description: "Penerimaan jalur reguler melalui seleksi nilai rapor dan wawancara." },
+  { step: 3, title: "Tes Seleksi Kompetensi", date: "Pertengahan Juni 2026", description: "Uji minat bakat sesuai dengan program keahlian yang dipilih." },
+  { step: 4, title: "Sidang Kelulusan", date: "Akhir Juni 2026", description: "Pengumuman resmi calon siswa yang diterima di SMK Nusantara." },
+  { step: 5, title: "Masa Orientasi (MPLS)", date: "Juli 2026", description: "Pengenalan lingkungan sekolah dan kurikulum industri." },
 ];
 
 // Biaya PPDB

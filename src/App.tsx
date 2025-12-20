@@ -12,6 +12,7 @@ import Program from "./pages/Program";
 import Berita from "./pages/Berita";
 import BeritaDetail from "./pages/BeritaDetail";
 import Galeri from "./pages/Galeri";
+import AlbumDetail from "./pages/AlbumDetail";
 import Kontak from "./pages/Kontak";
 import PPDB from "./pages/PPDB";
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/berita" element={<Berita />} />
             <Route path="/berita/:slug" element={<BeritaDetail />} />
             <Route path="/galeri" element={<Galeri />} />
+            <Route path="/galeri/:slug" element={<AlbumDetail />} />
             <Route path="/kontak" element={<Kontak />} />
             <Route path="/ppdb" element={<PPDB />} />
 
