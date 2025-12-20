@@ -1,13 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Helmet } from "react-helmet-async";
+import { PublicLayout } from "@/components/layout/PublicLayout";
+import { HeroSection } from "@/components/sections/HeroSection";
+import { KeunggulanSection } from "@/components/sections/KeunggulanSection";
+import { ProgramSection } from "@/components/sections/ProgramSection";
+import { StatistikSection } from "@/components/sections/StatistikSection";
+import { NewsSection } from "@/components/sections/NewsSection";
+import { TestimoniSection } from "@/components/sections/TestimoniSection";
+import { CTASection } from "@/components/sections/CTASection";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <Helmet>
+        <title>SMK Nusantara - Sekolah Menengah Kejuruan Terbaik</title>
+        <meta
+          name="description"
+          content="SMK Nusantara adalah sekolah menengah kejuruan unggulan dengan 6 program keahlian, fasilitas modern, dan kurikulum berbasis industri. Daftar PPDB sekarang!"
+        />
+      </Helmet>
+      <PublicLayout>
+        <HeroSection />
+        <KeunggulanSection />
+        <ProgramSection />
+        <StatistikSection />
+        <NewsSection />
+        <TestimoniSection />
+        <CTASection />
+      </PublicLayout>
+    </>
   );
 };
 
