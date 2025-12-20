@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Profil from "./pages/Profil";
 import Program from "./pages/Program";
 import Berita from "./pages/Berita";
+import BeritaDetail from "./pages/BeritaDetail";
 import Galeri from "./pages/Galeri";
 import Kontak from "./pages/Kontak";
 import PPDB from "./pages/PPDB";
@@ -39,10 +40,11 @@ const App = () => (
             <Route path="/profil" element={<Profil />} />
             <Route path="/program" element={<Program />} />
             <Route path="/berita" element={<Berita />} />
+            <Route path="/berita/:slug" element={<BeritaDetail />} />
             <Route path="/galeri" element={<Galeri />} />
             <Route path="/kontak" element={<Kontak />} />
             <Route path="/ppdb" element={<PPDB />} />
-            
+
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -50,7 +52,7 @@ const App = () => (
             <Route path="/admin/agenda" element={<AdminAgenda />} />
             <Route path="/admin/program" element={<AdminProgram />} />
             <Route path="/admin/galeri" element={<AdminGaleri />} />
-            
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
