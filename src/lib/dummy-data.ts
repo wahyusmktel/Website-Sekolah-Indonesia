@@ -341,3 +341,79 @@ export const biayaPPDB = [
   { item: "Seragam Lengkap", biaya: 1500000 },
   { item: "Buku & Alat", biaya: 500000 },
 ];
+
+// Prestasi Siswa
+export const prestasiList = [
+  {
+    id: 1,
+    slug: "juara-1-lks-nasional-it-software",
+    title: "Juara 1 LKS Nasional Bidang IT Software Solution",
+    category: "Akademik",
+    winner: "Zaky Ahmad",
+    date: "2023",
+    level: "Nasional",
+    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
+    description: "Prestasi gemilang di tingkat nasional dalam pengembangan solusi perangkat lunak berbasis industri.",
+    longDescription: "Zaky Ahmad berhasil meraih gelar terbaik pada Lomba Kompetensi Siswa (LKS) Tingkat Nasional tahun 2023. Dalam kompetisi ini, Zaky berhasil merancang sistem ERP berbasis cloud yang efisien dalam waktu kurang dari 15 jam kerja. Kemenangan ini membuktikan kualitas kurikulum IT di SMK Nusantara yang selaras dengan standar industri global."
+  },
+  {
+    id: 2,
+    slug: "medali-emas-olimpiade-jaringan-telkom",
+    title: "Medali Emas Olimpiade Jaringan Telkom",
+    category: "Jurusan",
+    winner: "Team TJAT SMK Nusantara",
+    date: "2023",
+    level: "Nasional",
+    image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=800",
+    description: "Keunggulan dalam konfigurasi dan optimasi jaringan fiber optik skala enterprise.",
+    longDescription: "Tim Teknik Jaringan Akses Telekomunikasi (TJAT) SMK Nusantara menunjukkan dominasinya dalam Olimpiade Jaringan yang diselenggarakan oleh PT Telkom Indonesia. Mereka berhasil melakukan penyambungan fiber optik (splicing) tercepat dengan loss signal hampir nol persen, serta melakukan instalasi FTTH yang rapi sesuai standar teknis perusahaan."
+  },
+  {
+    id: 3,
+    slug: "juara-2-animasi-pendek-fls2n",
+    title: "Juara 2 Animasi Pendek FLS2N",
+    category: "Seni",
+    winner: "Maya Putri & Team",
+    date: "2023",
+    level: "Provinsi",
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800",
+    description: "Kreativitas tinggi dalam menyampaikan pesan sosial melalui media animasi 2D yang memukau.",
+    longDescription: "Melalui karya berjudul 'Lumina: Cahaya Pengetahuan', Maya Putri dan timnya berhasil meraih posisi kedua di ajang Festival dan Lomba Seni Siswa Nasional (FLS2N) tingkat provinsi. Animasi ini dipuji karena kehalusan teknik rigging dan pesan moral mendalam mengenai pentingnya pendidikan di era digital."
+  },
+  {
+    id: 4,
+    slug: "juara-1-web-technologies-worldskills",
+    title: "Juara 1 Web Technologies WorldSkills Indonesia",
+    category: "Akademik",
+    winner: "Rio Adriansyah",
+    date: "2022",
+    level: "Nasional",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
+    description: "Penguasaan teknologi web modern dan arsitektur frontend yang responsif serta performan.",
+    longDescription: "Rio Adriansyah membuktikan diri sebagai pengembang web muda berbakat dengan menjuarai seleksi WorldSkills Indonesia. Ia berhasil mengimplementasikan berbagai API kompleks dan optimasi PWA yang memberikan pengalaman pengguna luar biasa, mengalahkan puluhan pesaing dari sekolah vokasi unggulan lainnya."
+  },
+  {
+    id: 5,
+    slug: "medali-perak-karate-pelajar",
+    title: "Medali Perak Kejuaraan Karate antar Pelajar",
+    category: "Olahraga",
+    winner: "Kevin Sanjaya",
+    date: "2023",
+    level: "Provinsi",
+    image: "https://images.unsplash.com/photo-1552072092-2f9b1603b381?auto=format&fit=crop&q=80&w=800",
+    description: "Kedisiplinan dan mental kuat dalam kompetisi olahraga beladiri tingkat provinsi.",
+    longDescription: "Kevin Sanjaya tidak hanya unggul di ruang kelas, tetapi juga di gelanggang olahraga. Berkat kedisiplinan latihan ekstrakurikuler karate di sekolah, ia berhasil meraih medali perak. Prestasi ini menunjukkan keseimbangan pengembangan karakter fisik dan mental yang ditekankan di SMK Nusantara."
+  },
+  {
+    id: 6,
+    slug: "best-design-uiux-hackathon",
+    title: "Best Design UI/UX Hackathon School",
+    category: "IT",
+    winner: "Design Team Squad",
+    date: "2023",
+    level: "Kota",
+    image: "https://images.unsplash.com/photo-1586717791821-3f44a563dc4c?auto=format&fit=crop&q=80&w=800",
+    description: "Inovasi desain antarmuka pengguna yang intuitif dan berpusat pada pengalaman bermakna.",
+    longDescription: "Dalam ajang Hackathon antar sekolah tingkat kota, tim desain SMK Nusantara meraih penghargaan 'Best Design'. Solusi aplikasi 'Smart Citizen' yang mereka kembangkan memiliki alur navigasi yang sangat ramah pengguna dengan skema warna yang menenangkan, membuktikan kemampuan mereka dalam desain digital modern."
+  }
+];

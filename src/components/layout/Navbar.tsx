@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Program", href: "/program" },
   { name: "Berita", href: "/berita" },
   { name: "Galeri", href: "/galeri" },
+  { name: "Prestasi", href: "/prestasi" },
   { name: "Kontak", href: "/kontak" },
 ];
 

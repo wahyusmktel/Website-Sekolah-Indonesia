@@ -15,6 +15,8 @@ import Galeri from "./pages/Galeri";
 import AlbumDetail from "./pages/AlbumDetail";
 import Kontak from "./pages/Kontak";
 import PPDB from "./pages/PPDB";
+import Prestasi from "./pages/Prestasi";
+import PrestasiDetail from "./pages/PrestasiDetail";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/Login";
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/galeri/:slug" element={<AlbumDetail />} />
             <Route path="/kontak" element={<Kontak />} />
             <Route path="/ppdb" element={<PPDB />} />
+            <Route path="/prestasi" element={<Prestasi />} />
+            <Route path="/prestasi/:slug" element={<PrestasiDetail />} />
 
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
