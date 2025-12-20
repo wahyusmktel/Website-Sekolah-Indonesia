@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImg1 from "@/assets/hero-1.jpg";
 import heroImg2 from "@/assets/hero-2.jpg";
@@ -10,27 +10,30 @@ import heroImg3 from "@/assets/hero-3.jpg";
 const slides = [
   {
     id: 1,
-    title: "Selamat Datang di SMK Nusantara",
-    subtitle: "Mencetak Generasi Unggul, Berkarakter, dan Siap Kerja",
+    title: "Masa Depan Digital Dimulai di Sini",
+    subtitle: "SMK Nusantara menghadirkan pendidikan vokasi berbasis teknologi masa depan dengan standar industri global.",
     image: heroImg1,
-    cta: "Daftar Sekarang",
-    ctaLink: "/ppdb",
+    cta: "Mulai Jelajahi",
+    ctaLink: "/program",
+    tag: "Inovasi Pendidikan",
   },
   {
     id: 2,
-    title: "Fasilitas Modern & Lengkap",
-    subtitle: "Laboratorium, Workshop, dan Ruang Praktik Standar Industri",
+    title: "Kembangkan Bakat Tanpa Batas",
+    subtitle: "Fasilitas laboratorium kelas dunia dan pengajar praktisi siap membimbingmu menjadi ahli di bidangnya.",
     image: heroImg2,
     cta: "Lihat Fasilitas",
     ctaLink: "/profil",
+    tag: "Fasilitas Unggul",
   },
   {
     id: 3,
-    title: "Raih Masa Depan Cerah",
-    subtitle: "Alumni Sukses di Berbagai Perusahaan Ternama",
+    title: "Siap Kerja & Siap Wirausaha",
+    subtitle: "Kurikulum yang dirancang khusus untuk memenuhi kebutuhan dunia kerja modern dan ekosistem startup.",
     image: heroImg3,
-    cta: "Lihat Program",
-    ctaLink: "/program",
+    cta: "Daftar Sekarang",
+    ctaLink: "/ppdb",
+    tag: "Karir Global",
   },
 ];
 
@@ -48,114 +51,165 @@ export function HeroSection() {
 
   useEffect(() => {
     if (!isAutoPlaying) return;
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextSlide, 7000);
     return () => clearInterval(interval);
   }, [isAutoPlaying, nextSlide]);
 
   return (
-    <section className="relative h-screen min-h-[600px] overflow-hidden">
-      {/* Slides */}
+    <section className="relative h-screen min-h-[700px] overflow-hidden bg-foreground">
+      {/* Background Slides */}
       <AnimatePresence mode="wait">
         {slides.map(
           (slide, index) =>
             index === currentSlide && (
               <motion.div
                 key={slide.id}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.7 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
                 className="absolute inset-0"
               >
-                {/* Background Image */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center"
+                  className="absolute inset-0 bg-cover bg-center scale-110"
                   style={{ backgroundImage: `url(${slide.image})` }}
-                />
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-transparent" />
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-foreground via-foreground/40 to-transparent" />
+                  <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
+                </div>
+
+                {/* Geometric Decorations */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <motion.div
+                    initial={{ x: -100, y: -100, rotate: -45, opacity: 0 }}
+                    animate={{ x: 0, y: 0, rotate: -45, opacity: 0.1 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary rounded-3xl"
+                  />
+                  <motion.div
+                    initial={{ x: 100, y: 100, rotate: 15, opacity: 0 }}
+                    animate={{ x: 0, y: 0, rotate: 15, opacity: 0.1 }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                    className="absolute bottom-[-100px] right-[-100px] w-[600px] h-[600px] border-[40px] border-primary rounded-full"
+                  />
+                </div>
 
                 {/* Content */}
                 <div className="relative h-full container mx-auto px-4 flex items-center">
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="max-w-2xl"
-                  >
-                    <motion.h1
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4, duration: 0.6 }}
-                      className="text-4xl md:text-5xl lg:text-6xl font-bold text-background mb-6 leading-tight"
+                  <div className="max-w-3xl">
+                    <motion.div
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, duration: 0.6 }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-primary-light text-sm font-bold mb-6"
                     >
-                      {slide.title}
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      {slide.tag}
+                    </motion.div>
+
+                    <motion.h1
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4, duration: 0.8 }}
+                      className="text-5xl md:text-7xl lg:text-8xl font-black text-background mb-8 leading-tight tracking-tight"
+                    >
+                      {slide.title.split(" ").map((word, i) => (
+                        <span key={i} className="inline-block mr-[0.2em]">
+                          {word}
+                        </span>
+                      ))}
                     </motion.h1>
+
                     <motion.p
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5, duration: 0.6 }}
-                      className="text-lg md:text-xl text-background/90 mb-8"
+                      transition={{ delay: 0.6, duration: 0.8 }}
+                      className="text-xl md:text-2xl text-background/80 mb-10 leading-relaxed max-w-xl font-light"
                     >
                       {slide.subtitle}
                     </motion.p>
+
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6, duration: 0.6 }}
-                      className="flex flex-wrap gap-4"
+                      transition={{ delay: 0.8, duration: 0.8 }}
+                      className="flex flex-wrap gap-6"
                     >
-                      <Button size="xl" variant="hero" asChild>
-                        <Link to={slide.ctaLink}>{slide.cta}</Link>
+                      <Button size="xl" variant="gradient" asChild className="group">
+                        <Link to={slide.ctaLink}>
+                          {slide.cta}
+                          <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Link>
                       </Button>
-                      <Button size="xl" variant="hero-outline" asChild>
-                        <Link to="/kontak">Hubungi Kami</Link>
+                      <Button size="xl" variant="hero-outline" asChild className="backdrop-blur-sm border-white/20 hover:bg-white/10">
+                        <Link to="/kontak">Konsultasi Gratis</Link>
                       </Button>
                     </motion.div>
-                  </motion.div>
+                  </div>
                 </div>
               </motion.div>
             )
         )}
       </AnimatePresence>
 
-      {/* Navigation Arrows */}
-      <button
-        onClick={() => {
-          prevSlide();
-          setIsAutoPlaying(false);
-        }}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center text-background hover:bg-background/30 transition-colors z-10"
-      >
-        <ChevronLeft size={24} />
-      </button>
-      <button
-        onClick={() => {
-          nextSlide();
-          setIsAutoPlaying(false);
-        }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center text-background hover:bg-background/30 transition-colors z-10"
-      >
-        <ChevronRight size={24} />
-      </button>
+      {/* Navigation Controls */}
+      <div className="absolute bottom-12 right-12 z-20 flex items-center gap-6">
+        <div className="flex gap-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentSlide(index);
+                setIsAutoPlaying(false);
+              }}
+              className="group relative h-12 w-1 flex items-end bg-background/20 overflow-hidden"
+            >
+              <motion.div
+                className="absolute inset-x-0 bottom-0 bg-primary"
+                initial={{ height: 0 }}
+                animate={{ height: index === currentSlide ? "100%" : "0%" }}
+                transition={{ duration: index === currentSlide ? 7 : 0.3 }}
+              />
+            </button>
+          ))}
+        </div>
 
-      {/* Dots */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-        {slides.map((_, index) => (
+        <div className="flex gap-4">
           <button
-            key={index}
             onClick={() => {
-              setCurrentSlide(index);
+              prevSlide();
               setIsAutoPlaying(false);
             }}
-            className={`transition-all duration-300 rounded-full ${
-              index === currentSlide
-                ? "w-8 h-3 bg-primary"
-                : "w-3 h-3 bg-background/50 hover:bg-background/70"
-            }`}
-          />
-        ))}
+            className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
+          >
+            <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
+          </button>
+          <button
+            onClick={() => {
+              nextSlide();
+              setIsAutoPlaying(false);
+            }}
+            className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
+          >
+            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-background/50"
+      >
+        <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-0.5 h-12 bg-gradient-to-b from-primary to-transparent"
+        />
+      </motion.div>
     </section>
   );
 }

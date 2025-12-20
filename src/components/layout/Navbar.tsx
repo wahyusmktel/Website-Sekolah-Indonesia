@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -34,60 +34,105 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? "glass py-3 shadow-soft"
-          : "bg-transparent py-5"
+          ? "bg-white/70 dark:bg-foreground/70 backdrop-blur-xl py-3 border-b border-white/10 shadow-soft"
+          : "bg-transparent py-6"
       )}
     >
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">N</span>
+          <Link to="/" className="flex items-center gap-4 group">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-elevated">
+                <span className="text-background font-black text-2xl">N</span>
+              </div>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-lg flex items-center justify-center text-[10px] text-white"
+              >
+                <Sparkles size={10} />
+              </motion.div>
             </div>
-            <div>
+            <div className="flex flex-col">
               <span className={cn(
-                "font-bold text-xl transition-colors",
-                isScrolled ? "text-foreground" : "text-foreground"
+                "font-black text-2xl tracking-tighter leading-none transition-colors",
+                isScrolled ? "text-foreground" : "text-white"
               )}>
-                SMK Nusantara
+                SMK <span className="text-primary italic">N</span>
+              </span>
+              <span className={cn(
+                "text-[10px] font-black uppercase tracking-[0.3em] ml-1",
+                isScrolled ? "text-muted-foreground" : "text-white/60"
+              )}>
+                Nusantara
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={cn(
-                  "px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200",
-                  location.pathname === link.href
-                    ? "text-primary bg-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={cn(
+                    "relative px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300",
+                    isActive
+                      ? "text-primary dark:text-white"
+                      : isScrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-active"
+                      className="absolute inset-0 bg-primary/10 dark:bg-white/10 rounded-full -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Button variant="gradient" asChild>
-              <Link to="/ppdb">Daftar PPDB</Link>
+          {/* CTA & Actions */}
+          <div className="hidden lg:flex items-center gap-6">
+            <Button
+              variant={isScrolled ? "gradient" : "hero"}
+              size="lg"
+              asChild
+              className="rounded-full shadow-glow font-black border-none"
+            >
+              <Link to="/ppdb" className="tracking-widest uppercase text-xs">Join Now</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            className={cn(
+              "lg:hidden w-12 h-12 rounded-2xl flex items-center justify-center transition-colors border",
+              isScrolled
+                ? "bg-muted border-border text-foreground"
+                : "bg-white/10 border-white/20 text-white"
+            )}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <AnimatePresence mode="wait">
+              {isMobileMenuOpen ? (
+                <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
+                  <X size={24} />
+                </motion.div>
+              ) : (
+                <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
+                  <Menu size={24} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         </nav>
 
@@ -95,30 +140,43 @@ export function Navbar() {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden overflow-hidden"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="lg:hidden absolute top-full left-0 right-0 mt-4 px-4 h-screen"
             >
-              <div className="py-4 space-y-1">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className={cn(
-                      "block px-4 py-3 rounded-xl font-medium transition-all",
-                      location.pathname === link.href
-                        ? "text-primary bg-accent"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
+              <div className="bg-foreground rounded-[2rem] p-8 shadow-elevated border border-white/10 backdrop-blur-3xl">
+                <div className="flex flex-col gap-4">
+                  {navLinks.map((link, i) => (
+                    <motion.div
+                      key={link.href}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                    >
+                      <Link
+                        to={link.href}
+                        className={cn(
+                          "block px-6 py-4 rounded-2xl font-black text-lg uppercase tracking-widest transition-all",
+                          location.pathname === link.href
+                            ? "text-primary bg-primary/10"
+                            : "text-white/60 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        {link.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: navLinks.length * 0.1 }}
+                    className="pt-8 border-t border-white/10 mt-4"
                   >
-                    {link.name}
-                  </Link>
-                ))}
-                <div className="pt-4">
-                  <Button variant="gradient" className="w-full" asChild>
-                    <Link to="/ppdb">Daftar PPDB</Link>
-                  </Button>
+                    <Button variant="gradient" size="xl" className="w-full rounded-2xl h-16 font-black tracking-widest uppercase" asChild>
+                      <Link to="/ppdb">Daftar PPDB</Link>
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
