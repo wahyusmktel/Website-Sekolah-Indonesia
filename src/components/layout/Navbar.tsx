@@ -7,7 +7,16 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { name: "Beranda", href: "/" },
-  { name: "Profil", href: "/profil" },
+  {
+    name: "Tentang Kami",
+    href: "#",
+    submenu: [
+      { name: "Profil", href: "/profil" },
+      { name: "Struktur Organisasi", href: "/struktur-organisasi" },
+      { name: "Fasilitas", href: "/fasilitas" },
+      { name: "Hubungan Industri", href: "/hubungan-industri" },
+    ]
+  },
   { name: "Program", href: "/program" },
   { name: "Berita", href: "/berita" },
   { name: "Galeri", href: "/galeri" },
@@ -18,6 +27,8 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const location = useLocation();
 
   useEffect(() => {
@@ -30,7 +41,14 @@ export function Navbar() {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setActiveDropdown(null);
   }, [location]);
+
+  const toggleExpanded = (name: string) => {
+    setExpandedMenus(prev =>
+      prev.includes(name) ? prev.filter(item => item !== name) : [...prev, name]
+    );
+  };
 
   return (
     <header
@@ -76,7 +94,64 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm">
             {navLinks.map((link) => {
-              const isActive = location.pathname === link.href;
+              const isActive = location.pathname === link.href || (link.submenu?.some(sub => location.pathname === sub.href));
+
+              if (link.submenu) {
+                return (
+                  <div
+                    key={link.name}
+                    className="relative group/dropdown"
+                    onMouseEnter={() => setActiveDropdown(link.name)}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <button
+                      className={cn(
+                        "relative px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                        isActive
+                          ? "text-primary dark:text-white"
+                          : isScrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"
+                      )}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-active"
+                          className="absolute inset-0 bg-primary/10 dark:bg-white/10 rounded-full -z-10"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      {link.name}
+                      <ChevronDown className={cn("w-3 h-3 transition-transform duration-300", activeDropdown === link.name && "rotate-180")} />
+                    </button>
+
+                    <AnimatePresence>
+                      {activeDropdown === link.name && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute top-full left-0 mt-4 min-w-[240px] p-2 bg-white dark:bg-foreground rounded-3xl shadow-elevated border border-border overflow-hidden"
+                        >
+                          {link.submenu.map((sub) => (
+                            <Link
+                              key={sub.href}
+                              to={sub.href}
+                              className={cn(
+                                "block px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                location.pathname === sub.href
+                                  ? "text-primary bg-primary/5"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                              )}
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={link.href}
@@ -146,28 +221,73 @@ export function Navbar() {
               exit={{ opacity: 0, y: -20 }}
               className="lg:hidden absolute top-full left-0 right-0 mt-4 px-4 h-screen"
             >
-              <div className="bg-foreground rounded-[2rem] p-8 shadow-elevated border border-white/10 backdrop-blur-3xl">
+              <div className="bg-foreground rounded-[2rem] p-8 shadow-elevated border border-white/10 backdrop-blur-3xl overflow-y-auto max-h-[80vh]">
                 <div className="flex flex-col gap-4">
-                  {navLinks.map((link, i) => (
-                    <motion.div
-                      key={link.href}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <Link
-                        to={link.href}
-                        className={cn(
-                          "block px-6 py-4 rounded-2xl font-black text-lg uppercase tracking-widest transition-all",
-                          location.pathname === link.href
-                            ? "text-primary bg-primary/10"
-                            : "text-white/60 hover:text-white hover:bg-white/5"
-                        )}
+                  {navLinks.map((link, i) => {
+                    const isExpanded = expandedMenus.includes(link.name);
+                    const isActive = location.pathname === link.href || (link.submenu?.some(sub => location.pathname === sub.href));
+
+                    return (
+                      <motion.div
+                        key={link.name}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
                       >
-                        {link.name}
-                      </Link>
-                    </motion.div>
-                  ))}
+                        {link.submenu ? (
+                          <>
+                            <button
+                              onClick={() => toggleExpanded(link.name)}
+                              className={cn(
+                                "flex items-center justify-between w-full px-6 py-4 rounded-2xl font-black text-lg uppercase tracking-widest transition-all",
+                                isActive ? "text-primary" : "text-white/60"
+                              )}
+                            >
+                              {link.name}
+                              <ChevronDown className={cn("w-5 h-5 transition-transform", isExpanded && "rotate-180")} />
+                            </button>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden pl-4"
+                                >
+                                  {link.submenu.map((sub) => (
+                                    <Link
+                                      key={sub.href}
+                                      to={sub.href}
+                                      className={cn(
+                                        "block px-6 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all",
+                                        location.pathname === sub.href
+                                          ? "text-primary bg-primary/10"
+                                          : "text-white/40 hover:text-white"
+                                      )}
+                                    >
+                                      {sub.name}
+                                    </Link>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </>
+                        ) : (
+                          <Link
+                            to={link.href}
+                            className={cn(
+                              "block px-6 py-4 rounded-2xl font-black text-lg uppercase tracking-widest transition-all",
+                              location.pathname === link.href
+                                ? "text-primary bg-primary/10"
+                                : "text-white/60 hover:text-white hover:bg-white/5"
+                            )}
+                          >
+                            {link.name}
+                          </Link>
+                        )}
+                      </motion.div>
+                    );
+                  })}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

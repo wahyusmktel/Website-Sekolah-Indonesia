@@ -13,6 +13,9 @@ import Berita from "./pages/Berita";
 import BeritaDetail from "./pages/BeritaDetail";
 import Galeri from "./pages/Galeri";
 import AlbumDetail from "./pages/AlbumDetail";
+import StrukturOrganisasi from "./pages/StrukturOrganisasi";
+import Fasilitas from "./pages/Fasilitas";
+import HubunganIndustri from "./pages/HubunganIndustri";
 import Kontak from "./pages/Kontak";
 import PPDB from "./pages/PPDB";
 import Prestasi from "./pages/Prestasi";
@@ -41,6 +44,9 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/profil" element={<Profil />} />
+            <Route path="/struktur-organisasi" element={<StrukturOrganisasi />} />
+            <Route path="/fasilitas" element={<Fasilitas />} />
+            <Route path="/hubungan-industri" element={<HubunganIndustri />} />
             <Route path="/program" element={<Program />} />
             <Route path="/berita" element={<Berita />} />
             <Route path="/berita/:slug" element={<BeritaDetail />} />

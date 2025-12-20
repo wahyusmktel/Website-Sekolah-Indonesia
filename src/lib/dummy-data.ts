@@ -417,3 +417,156 @@ export const prestasiList = [
     longDescription: "Dalam ajang Hackathon antar sekolah tingkat kota, tim desain SMK Nusantara meraih penghargaan 'Best Design'. Solusi aplikasi 'Smart Citizen' yang mereka kembangkan memiliki alur navigasi yang sangat ramah pengguna dengan skema warna yang menenangkan, membuktikan kemampuan mereka dalam desain digital modern."
   }
 ];
+
+// Struktur Organisasi
+export const strukturOrganisasi = {
+  kepalaSekolah: {
+    name: "Dr. H. Ahmad Fauzi, M.Pd.",
+    role: "Kepala Sekolah",
+    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400",
+    description: "Memimpin dengan visi teknologi dan integritas untuk mencetak generasi unggul."
+  },
+  wakilKepalaSekolah: [
+    {
+      name: "Drs. Bambang Sudarsono",
+      role: "Waka Kurikulum",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Siti Aminah, S.Pd.",
+      role: "Waka Kesiswaan",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Ir. Hendra Wijaya",
+      role: "Waka Hubungan Industri",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "M. Ridwan, S.T.",
+      role: "Waka Sarana Prasarana",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"
+    }
+  ],
+  ketuaJurusan: [
+    {
+      name: "Agus Setiawan, S.Kom.",
+      role: "Kajur TJAT",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Dewi Lestari, M.T.",
+      role: "Kajur TKJ",
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Budi Pratama, S.T.",
+      role: "Kajur RPL",
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Siska Putri, M.Sn.",
+      role: "Kajur Animasi",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400"
+    }
+  ]
+};
+
+// Fasilitas Sekolah
+export const fasilitasSekolah = [
+  {
+    id: 1,
+    title: "Smart Digital Classroom",
+    description: "Ruang belajar futuristik yang dirancang untuk kenyamanan maksimal dan efektivitas digital.",
+    features: ["AC & Air Purifier", "Smart TV 75 inch", "Glassboard", "High-speed WiFi 6", "CCTV 24/7", "Ergonomic Chairs"],
+    image: "https://images.unsplash.com/photo-1541339907198-e08756dee9b8?auto=format&fit=crop&q=80&w=1000",
+    icon: "Monitor"
+  },
+  {
+    id: 2,
+    title: "Advanced IT & Networking Lab",
+    description: "Laboratorium berstandar industri dengan perangkat Cisco dan server mumpuni untuk praktek jaringan.",
+    features: ["Cisco Routers & Switches", "Rack Server", "Fiber Optic Splicer", "PC Core i9", "Dual Monitor Setup"],
+    image: "https://images.unsplash.com/photo-1558494949-ef010ccdcc58?auto=format&fit=crop&q=80&w=1000",
+    icon: "Cpu"
+  },
+  {
+    id: 3,
+    title: "Animation & Multimedia Studio",
+    description: "Studio kreatif untuk produksi animasi dan konten multimedia dengan hardware kartu grafis tinggi.",
+    features: ["Wacom Cintiq Tablet", "Render Farm", "Green Screen Area", "Soundproof Room", "Professional Camera Gear"],
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=1000",
+    icon: "Layers"
+  },
+  {
+    id: 4,
+    title: "Futuristic Library & Co-working",
+    description: "Ruang baca digital dan area kolaborasi yang memacu lahirnya ide-ide inovatif.",
+    features: ["Digital Library App", "E-Book Tablets", "Bean Bag Area", "Discussion Pods", "Free Coffee Station"],
+    image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=1000",
+    icon: "BookOpen"
+  },
+  {
+    id: 5,
+    title: "Techno Hall & Arena",
+    description: "Gedung serbaguna indoor untuk kegiatan olahraga, seminar teknologi, dan showcase karya.",
+    features: ["Full Sound System", "LED Videotron", "Basketball Court", "Badminton Court", "Retractable Seating"],
+    image: "https://images.unsplash.com/photo-1577416414929-7a4c9f1ac3c6?auto=format&fit=crop&q=80&w=1000",
+    icon: "Activity"
+  },
+  {
+    id: 6,
+    title: "Digital Smart Canteen",
+    description: "Kantin bersih dan sehat dengan sistem pembayaran non-tunai dan pemesanan digital.",
+    features: ["Cashless Payment", "Digital Order Kiosks", "Eco-friendly Area", "Healthy Food Audit", "Outdoor Seating"],
+    image: "https://images.unsplash.com/photo-1567521464027-f127ff144326?auto=format&fit=crop&q=80&w=1000",
+    icon: "Coffee"
+  }
+];
+
+// Hubungan Industri
+export const hubunganIndustri = {
+  partners: [
+    { name: "PT Telkom Indonesia", logo: "https://upload.wikimedia.org/wikipedia/id/thumb/c/c8/Telkom_Indonesia_logo_2013.svg/1200px-Telkom_Indonesia_logo_2013.svg.png", category: "Telecommunication" },
+    { name: "Cisco Systems", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Cisco_logo_blue_2016.svg/1200px-Cisco_logo_blue_2016.svg.png", category: "Networking" },
+    { name: "Google Cloud", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Google_Cloud_logo.svg/1280px-Google_Cloud_logo.svg.png", category: "Cloud Computing" },
+    { name: "PT Huawei Tech", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Huawei_Logo.svg/1200px-Huawei_Logo.svg.png", category: "Telecommunication" },
+    { name: "Adobe Inc.", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Adobe_Systems_logo_and_wordmark.svg/1200px-Adobe_Systems_logo_and_wordmark.svg.png", category: "Creative Industry" },
+    { name: "Tokopedia", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_Tokopedia.svg/1200px-Logo_Tokopedia.svg.png", category: "Technology" },
+    { name: "Traveloka", logo: "https://upload.wikimedia.org/wikipedia/id/thumb/e/e9/Traveloka_logo.svg/1200px-Traveloka_logo.svg.png", category: "Technology" },
+    { name: "Gojek", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Gojek_logo_2019.svg/1200px-Gojek_logo_2019.svg.png", category: "Technology" }
+  ],
+  programs: [
+    {
+      id: 1,
+      title: "Kelas Industri (Co-Branded)",
+      description: "Kurikulum yang disusun bersama industri untuk memastikan lulusan memiliki skill yang tepat sasaran.",
+      icon: "Building2"
+    },
+    {
+      id: 2,
+      title: "Sertifikasi Internasional",
+      description: "Siswa dibekali sertifikasi dari vendor global seperti Cisco (CCNA), Huawei (HCIA), dan Adobe (ACA).",
+      icon: "Award"
+    },
+    {
+      id: 3,
+      title: "Praktik Kerja Lapangan (PKL)",
+      description: "Penempatan magang minimal 6 bulan di perusahaan mitra strategis dengan bimbingan mentor profesional.",
+      icon: "Briefcase"
+    },
+    {
+      id: 4,
+      title: "Bursa Kerja Khusus (BKK)",
+      description: "Layanan penempatan kerja bagi alumni dengan jaringan lebih dari 100+ perusahaan nasional.",
+      icon: "Target"
+    }
+  ],
+  stats: [
+    { label: "Partner Aktif", value: "120+" },
+    { label: "Serapan Lulusan", value: "92%" },
+    { label: "Kelas Industri", value: "8" },
+    { label: "MoU International", value: "5" }
+  ]
+};
+
