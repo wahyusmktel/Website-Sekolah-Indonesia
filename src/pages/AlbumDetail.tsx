@@ -4,30 +4,56 @@ import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Calendar, Image as ImageIcon, X, ChevronLeft, ChevronRight, Share2, Download } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { albumList } from "@/lib/dummy-data";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { formatDate } from "@/lib/date-utils";
+import { Loader2 } from "lucide-react";
 import NotFound from "./NotFound";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function AlbumDetail() {
     const { slug } = useParams();
-    const album = albumList.find((a) => a.slug === slug);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
+    const { data: album, isLoading } = useQuery({
+        queryKey: ['album-detail', slug],
+        queryFn: async () => {
+            const response = await apiClient.get(`/albums/slug/${slug}`);
+            return response.data;
+        },
+        enabled: !!slug
+    });
+
+    if (isLoading) {
+        return (
+            <PublicLayout>
+                <div className="min-h-screen flex flex-col items-center justify-center bg-foreground">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary/40 mb-4" />
+                    <p className="text-white/40 font-medium uppercase tracking-[0.2em] text-xs font-black">Membuka Album Kenangan...</p>
+                </div>
+            </PublicLayout>
+        );
+    }
 
     if (!album) {
         return <NotFound />;
     }
 
+    const albumItems = album.items || [];
+
     const handlePrev = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (selectedImageIndex !== null) {
-            setSelectedImageIndex((selectedImageIndex - 1 + album.items.length) % album.items.length);
+            setSelectedImageIndex((selectedImageIndex - 1 + albumItems.length) % albumItems.length);
         }
     };
 
     const handleNext = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (selectedImageIndex !== null) {
-            setSelectedImageIndex((selectedImageIndex + 1) % album.items.length);
+            setSelectedImageIndex((selectedImageIndex + 1) % albumItems.length);
         }
     };
 
@@ -41,7 +67,10 @@ export default function AlbumDetail() {
                 {/* Gallery Hero */}
                 <section className="relative pt-40 pb-20 overflow-hidden bg-foreground">
                     <div className="absolute inset-0 opacity-30">
-                        <img src={album.coverImage} className="w-full h-full object-cover blur-md scale-110" />
+                        <img
+                            src={album.cover_image?.startsWith('http') ? album.cover_image : `${API_BASE_URL}${album.cover_image}`}
+                            className="w-full h-full object-cover blur-md scale-110"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-foreground to-transparent" />
                     </div>
 
@@ -58,11 +87,11 @@ export default function AlbumDetail() {
                             <div className="flex flex-wrap items-center gap-6 mb-8 text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">
                                 <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
                                     <Calendar className="w-4 h-4 text-primary" />
-                                    {new Date(album.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                    {formatDate(album.date)}
                                 </div>
                                 <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
                                     <ImageIcon className="w-4 h-4 text-primary" />
-                                    {album.items.length} Dokumentasi
+                                    {albumItems.length} Dokumentasi
                                 </div>
                             </div>
 
@@ -80,7 +109,7 @@ export default function AlbumDetail() {
                 <section className="py-24 bg-white dark:bg-foreground/[0.02]">
                     <div className="container mx-auto px-4">
                         <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-                            {album.items.map((item, index) => (
+                            {albumItems.map((item: any, index: number) => (
                                 <motion.div
                                     key={item.id}
                                     initial={{ opacity: 0, scale: 0.9 }}
@@ -91,7 +120,7 @@ export default function AlbumDetail() {
                                     onClick={() => setSelectedImageIndex(index)}
                                 >
                                     <img
-                                        src={item.image}
+                                        src={item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image}`}
                                         alt={item.title}
                                         className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
                                     />
@@ -127,7 +156,7 @@ export default function AlbumDetail() {
                             {/* Top Bar */}
                             <div className="absolute top-0 inset-x-0 p-8 flex justify-between items-center z-10">
                                 <div className="text-white/60 text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                                    {selectedImageIndex + 1} / {album.items.length} — {album.items[selectedImageIndex].title}
+                                    {selectedImageIndex + 1} / {albumItems.length} — {albumItems[selectedImageIndex].title}
                                 </div>
                                 <button
                                     className="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all border border-white/10"
@@ -160,15 +189,15 @@ export default function AlbumDetail() {
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <img
-                                    src={album.items[selectedImageIndex].image}
+                                    src={albumItems[selectedImageIndex]?.image?.startsWith('http') ? albumItems[selectedImageIndex].image : `${API_BASE_URL}${albumItems[selectedImageIndex]?.image}`}
                                     className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
-                                    alt={album.items[selectedImageIndex].title}
+                                    alt={albumItems[selectedImageIndex].title}
                                 />
                             </motion.div>
 
                             {/* Bottom Info */}
                             <div className="absolute bottom-8 inset-x-0 text-center px-4">
-                                <h3 className="text-white text-xl font-bold mb-2">{album.items[selectedImageIndex].title}</h3>
+                                <h3 className="text-white text-xl font-bold mb-2">{albumItems[selectedImageIndex].title}</h3>
                                 <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">SMK Nusantara Press Dokumentasi</p>
                             </div>
                         </motion.div>

@@ -28,6 +28,10 @@ import AdminBerita from "./pages/admin/Berita";
 import AdminAgenda from "./pages/admin/Agenda";
 import AdminProgram from "./pages/admin/Program";
 import AdminGaleri from "./pages/admin/Galeri";
+import AdminKategori from "./pages/admin/Kategori";
+
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
 
 import NotFound from "./pages/NotFound";
 
@@ -58,12 +62,18 @@ const App = () => (
             <Route path="/prestasi/:slug" element={<PrestasiDetail />} />
 
             {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/berita" element={<AdminBerita />} />
-            <Route path="/admin/agenda" element={<AdminAgenda />} />
-            <Route path="/admin/program" element={<AdminProgram />} />
-            <Route path="/admin/galeri" element={<AdminGaleri />} />
+            <Route element={<PublicRoute />}>
+              <Route path="/admin/login" element={<AdminLogin />} />
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/berita" element={<AdminBerita />} />
+              <Route path="/admin/agenda" element={<AdminAgenda />} />
+              <Route path="/admin/program" element={<AdminProgram />} />
+              <Route path="/admin/galeri" element={<AdminGaleri />} />
+              <Route path="/admin/kategori" element={<AdminKategori />} />
+            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>

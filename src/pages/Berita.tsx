@@ -1,33 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Eye, Search, ArrowRight, TrendingUp, Sparkles, Filter, ChevronRight } from "lucide-react";
+import { Calendar, Eye, Search, ArrowRight, TrendingUp, Sparkles, Filter, ChevronRight, Loader2 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { beritaList } from "@/lib/dummy-data";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { getImageUrl } from "@/lib/image-utils";
 
 const Berita = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = [...new Set(beritaList.map((b) => b.category))];
+  const { data: beritaList = [], isLoading } = useQuery({
+    queryKey: ['berita'],
+    queryFn: async () => {
+      const response = await apiClient.get('/berita');
+      return response.data;
+    }
+  });
 
-  const filteredBerita = beritaList.filter((berita) => {
+  const { data: categories = [] } = useQuery({
+    queryKey: ['kategori-berita'],
+    queryFn: async () => {
+      const response = await apiClient.get('/kategori-berita');
+      return response.data;
+    }
+  });
+
+  const filteredBerita = beritaList.filter((berita: any) => {
     const matchesSearch = berita.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       berita.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || berita.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const featuredNews = beritaList[0];
+  const pageUrl = `${window.location.origin}/berita`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Berita & Artikel SMK Nusantara",
+    "description": "Berita dan informasi terbaru seputar kegiatan, prestasi, dan pengumuman SMK Nusantara.",
+    "url": pageUrl,
+    "publisher": {
+      "@type": "Organization",
+      "name": "SMK Nusantara"
+    }
+  };
 
   return (
     <>
       <Helmet>
-        <title>Berita & Artikel - SMK Nusantara</title>
-        <meta name="description" content="Berita dan informasi terbaru seputar kegiatan, prestasi, dan pengumuman SMK Nusantara." />
+        <title>Berita & Artikel | Hub Informasi Terkini SMK Nusantara</title>
+        <meta name="description" content="Eksplorasi wawasan terbaru, prestasi siswa, inovasi vokasi, dan agenda transformasional hanya di portal berita resmi SMK Nusantara." />
+        <meta name="keywords" content="SMK Nusantara, Berita Sekolah, Vokasi, Prestasi Siswa, Pendidikan Indonesia, Artikel Pendidikan" />
+        <link rel="canonical" href={pageUrl} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content="Berita & Artikel | SMK Nusantara" />
+        <meta property="og:description" content="Portal informasi resmi SMK Nusantara. Temukan berita terbaru dan inspirasi pendidikan vokasi di sini." />
+
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
       </Helmet>
       <PublicLayout>
         {/* Modern Header Section */}
@@ -82,22 +120,22 @@ const Berita = () => {
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all shrink-0 ${!selectedCategory
-                      ? "bg-primary text-white shadow-glow"
-                      : "bg-foreground/5 text-foreground hover:bg-foreground/10"
+                    ? "bg-primary text-white shadow-glow"
+                    : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                     }`}
                 >
                   Semua
                 </button>
-                {categories.map((category) => (
+                {categories.map((c: any) => (
                   <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all shrink-0 ${selectedCategory === category
-                        ? "bg-primary text-white shadow-glow"
-                        : "bg-foreground/5 text-foreground hover:bg-foreground/10"
+                    key={c.id}
+                    onClick={() => setSelectedCategory(c.name)}
+                    className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all shrink-0 ${selectedCategory === c.name
+                      ? "bg-primary text-white shadow-glow"
+                      : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                       }`}
                   >
-                    {category}
+                    {c.name}
                   </button>
                 ))}
               </div>
@@ -108,7 +146,9 @@ const Berita = () => {
         {/* Featured News / News Grid */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            {filteredBerita.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-32"><Loader2 className="w-12 h-12 animate-spin text-primary" /></div>
+            ) : filteredBerita.length === 0 ? (
               <div className="text-center py-32 bg-foreground/5 rounded-[4rem] border-2 border-dashed border-border">
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Search className="w-10 h-10 text-primary" />
@@ -124,7 +164,7 @@ const Berita = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 <AnimatePresence mode="popLayout">
-                  {filteredBerita.map((berita, index) => (
+                  {filteredBerita.map((berita: any, index: number) => (
                     <motion.article
                       key={berita.id}
                       layout
@@ -137,7 +177,7 @@ const Berita = () => {
                       <Link to={`/berita/${berita.slug}`} className="block h-64 relative overflow-hidden bg-muted">
                         <div className="absolute inset-0 bg-foreground/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
                         <img
-                          src={berita.image === "/placeholder.svg" ? `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800` : berita.image}
+                          src={getImageUrl(berita.image)}
                           alt={berita.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />

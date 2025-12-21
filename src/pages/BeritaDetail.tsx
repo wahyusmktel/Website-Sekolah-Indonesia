@@ -1,27 +1,116 @@
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { Calendar, Eye, ArrowLeft, Share2, Facebook, Twitter, Instagram, Sparkles, ChevronRight, MessageCircle } from "lucide-react";
+import { Calendar, Eye, ArrowLeft, Share2, Facebook, Twitter, Instagram, Sparkles, ChevronRight, MessageCircle, Loader2 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { beritaList } from "@/lib/dummy-data";
 import { Badge } from "@/components/ui/badge";
 import NotFound from "./NotFound";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { getImageUrl } from "@/lib/image-utils";
+import { useEffect } from "react";
 
 export default function BeritaDetail() {
     const { slug } = useParams();
-    const berita = beritaList.find((b) => b.slug === slug);
+
+    const { data: berita, isLoading } = useQuery({
+        queryKey: ['berita', slug],
+        queryFn: async () => {
+            const response = await apiClient.get('/berita');
+            return response.data.find((b: any) => b.slug === slug);
+        }
+    });
+
+    const { data: relatedNews = [] } = useQuery({
+        queryKey: ['berita-related'],
+        queryFn: async () => {
+            const response = await apiClient.get('/berita');
+            return response.data.filter((b: any) => b.slug !== slug).slice(0, 3);
+        }
+    });
+
+    const viewMutation = useMutation({
+        mutationFn: (id: number) => apiClient.patch(`/berita/${id}/view`),
+    });
+
+    useEffect(() => {
+        if (berita?.id) {
+            viewMutation.mutate(berita.id);
+        }
+    }, [berita?.id]);
+
+    if (isLoading) {
+        return (
+            <PublicLayout>
+                <div className="min-h-screen flex items-center justify-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                </div>
+            </PublicLayout>
+        );
+    }
 
     if (!berita) {
         return <NotFound />;
     }
 
-    const relatedNews = beritaList.filter((b) => b.id !== berita.id).slice(0, 3);
+    const pageUrl = `${window.location.origin}/berita/${berita.slug}`;
+    const fullImageUrl = getImageUrl(berita.image).startsWith('http')
+        ? getImageUrl(berita.image)
+        : `${window.location.origin}${getImageUrl(berita.image)}`;
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": berita.title,
+        "image": [fullImageUrl],
+        "datePublished": new Date(berita.date).toISOString(),
+        "dateModified": new Date(berita.created_at || berita.date).toISOString(),
+        "author": [{
+            "@type": "Person",
+            "name": berita.author || "Administrator",
+            "url": window.location.origin
+        }],
+        "publisher": {
+            "@type": "Organization",
+            "name": "SMK Nusantara",
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${window.location.origin}/logo.png`
+            }
+        },
+        "description": berita.excerpt
+    };
 
     return (
         <>
             <Helmet>
-                <title>{berita.title} - SMK Nusantara</title>
+                {/* Basic Meta Tags */}
+                <title>{berita.title} | Berita SMK Nusantara</title>
                 <meta name="description" content={berita.excerpt} />
+                <meta name="keywords" content={`${berita.category}, SMK Nusantara, Berita Sekolah, Vokasi, ${berita.title.split(' ').join(', ')}`} />
+                <link rel="canonical" href={pageUrl} />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={pageUrl} />
+                <meta property="og:title" content={berita.title} />
+                <meta property="og:description" content={berita.excerpt} />
+                <meta property="og:image" content={fullImageUrl} />
+                <meta property="article:published_time" content={new Date(berita.date).toISOString()} />
+                <meta property="article:author" content={berita.author || "Administrator"} />
+                <meta property="article:section" content={berita.category} />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content={pageUrl} />
+                <meta property="twitter:title" content={berita.title} />
+                <meta property="twitter:description" content={berita.excerpt} />
+                <meta property="twitter:image" content={fullImageUrl} />
+
+                {/* Structured Data */}
+                <script type="application/ld+json">
+                    {JSON.stringify(jsonLd)}
+                </script>
             </Helmet>
             <PublicLayout>
                 {/* Article Hero */}
@@ -104,7 +193,7 @@ export default function BeritaDetail() {
                             >
                                 <div className="relative rounded-[3rem] overflow-hidden mb-12 shadow-elevated border border-border">
                                     <img
-                                        src={berita.image === "/placeholder.svg" ? `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=1200` : berita.image}
+                                        src={getImageUrl(berita.image)}
                                         alt={berita.title}
                                         className="w-full h-auto object-cover"
                                     />
@@ -115,26 +204,10 @@ export default function BeritaDetail() {
                                         {berita.excerpt}
                                     </p>
 
-                                    <div className="text-muted-foreground font-light leading-relaxed space-y-8">
-                                        {/* Simulated content as the dummy data might not have full content */}
-                                        <p>
-                                            LUMINA NEWS — SMK Nusantara kembali menorehkan tinta emas dalam perjalanan transformasinya menuju institusi vokasi bertaraf internasional. Kegiatan yang berlangsung baru-baru ini di lingkungan sekolah menunjukkan betapa agilitas dan inovasi menjadi DNA utama bagi seluruh entitas sekolah.
-                                        </p>
-                                        <p>
-                                            Dalam sambutannya, perwakilan sekolah menekankan bahwa setiap inisiatif yang diambil—baik itu dalam bidang prestasi akademik maupun pengembangan infrastruktur digital—selalu berhulu pada satu tujuan: kemanfaatan maksimal bagi siswa di panggung industri global.
-                                        </p>
-                                        <div className="my-12 p-12 bg-foreground rounded-[3rem] text-white">
-                                            <MessageCircle className="w-12 h-12 text-primary mb-6" />
-                                            <h4 className="text-2xl font-black mb-4">"Ini adalah langkah nyata kami dalam menjawab tantangan Industry 4.0, di mana keahlian teknis harus berjalan beriringan dengan karakter yang kokoh."</h4>
-                                            <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">— Tim Manajemen Inovasi SMK Nusantara</p>
-                                        </div>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                                        </p>
-                                        <p>
-                                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Seluruh rangkaian rangkaian acara ini diharapkan mampu menjadi pemantik semangat bagi seluruh siswa untuk terus berkarya dan berinovasi tanpa batas.
-                                        </p>
-                                    </div>
+                                    <div
+                                        className="text-muted-foreground font-light leading-relaxed space-y-8 ql-editor"
+                                        dangerouslySetInnerHTML={{ __html: berita.content }}
+                                    />
                                 </div>
 
                                 {/* Tags & Meta Post */}
@@ -187,11 +260,11 @@ export default function BeritaDetail() {
                                 <div>
                                     <h4 className="text-xs font-black uppercase tracking-[0.3em] mb-10 pb-4 border-b-2 border-primary w-fit">Inspirasi Lainnya</h4>
                                     <div className="space-y-8">
-                                        {relatedNews.map((news) => (
+                                        {relatedNews.map((news: any) => (
                                             <Link key={news.id} to={`/berita/${news.slug}`} className="group flex gap-6 items-center">
                                                 <div className="w-24 h-24 rounded-2xl bg-muted overflow-hidden shrink-0 border border-border">
                                                     <img
-                                                        src={news.image === "/placeholder.svg" ? `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=200` : news.image}
+                                                        src={getImageUrl(news.image)}
                                                         alt={news.title}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                     />
