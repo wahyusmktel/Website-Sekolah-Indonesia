@@ -63,6 +63,7 @@ app.get('/api/stats', async (req, res) => {
         const [[{ counts: galeri }]] = await pool.query('SELECT COUNT(*) as counts FROM galeri') as any;
         const [[{ counts: programs }]] = await pool.query('SELECT COUNT(*) as counts FROM program_keahlian') as any;
         const [[{ counts: albums }]] = await pool.query('SELECT COUNT(*) as counts FROM album') as any;
+        const [[{ counts: heroSlides }]] = await pool.query('SELECT COUNT(*) as counts FROM hero_slides') as any;
 
         res.json({
             berita,
@@ -70,6 +71,7 @@ app.get('/api/stats', async (req, res) => {
             galeri,
             programs,
             albums,
+            heroSlides,
             siswa: 1250, // Static for now or fetch from another table
         });
     } catch (error) {
@@ -80,6 +82,53 @@ app.get('/api/stats', async (req, res) => {
 // Basic Route
 app.get('/', (req, res) => {
     res.send('School Website API is running...');
+});
+
+// Hero Slides Routes
+app.get('/api/hero-slides', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM hero_slides ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching hero slides', error });
+    }
+});
+
+app.post('/api/hero-slides', async (req, res) => {
+    const { title, subtitle, image, cta, cta_link, tag } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO hero_slides (title, subtitle, image, cta, cta_link, tag) VALUES (?, ?, ?, ?, ?, ?)',
+            [title, subtitle, image, cta, cta_link, tag]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating hero slide', error });
+    }
+});
+
+app.put('/api/hero-slides/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, subtitle, image, cta, cta_link, tag } = req.body;
+    try {
+        await pool.query(
+            'UPDATE hero_slides SET title = ?, subtitle = ?, image = ?, cta = ?, cta_link = ?, tag = ? WHERE id = ?',
+            [title, subtitle, image, cta, cta_link, tag, id]
+        );
+        res.json({ message: 'Hero slide updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating hero slide', error });
+    }
+});
+
+app.delete('/api/hero-slides/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM hero_slides WHERE id = ?', [id]);
+        res.json({ message: 'Hero slide deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting hero slide', error });
+    }
 });
 
 // Berita Routes
@@ -345,10 +394,47 @@ app.delete('/api/kategori-berita/:id', async (req, res) => {
 // Program Routes
 app.get('/api/programs', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM program_keahlian');
+        const [rows] = await pool.query('SELECT * FROM program_keahlian ORDER BY id ASC');
         res.json(rows);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching programs', error });
+    }
+});
+
+app.post('/api/programs', async (req, res) => {
+    const { name, slug, short_desc, description, image, icon, prospects, key_techs } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO program_keahlian (name, slug, short_desc, description, image, icon, prospects, key_techs) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, slug, short_desc, description, image, icon, JSON.stringify(prospects), JSON.stringify(key_techs)]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating program', error });
+    }
+});
+
+app.put('/api/programs/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, slug, short_desc, description, image, icon, prospects, key_techs } = req.body;
+    try {
+        await pool.query(
+            'UPDATE program_keahlian SET name = ?, slug = ?, short_desc = ?, description = ?, image = ?, icon = ?, prospects = ?, key_techs = ? WHERE id = ?',
+            [name, slug, short_desc, description, image, icon, JSON.stringify(prospects), JSON.stringify(key_techs), id]
+        );
+        res.json({ message: 'Program updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating program', error });
+    }
+});
+
+app.delete('/api/programs/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM program_keahlian WHERE id = ?', [id]);
+        res.json({ message: 'Program deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting program', error });
     }
 });
 

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
   { icon: Newspaper, label: "Berita", href: "/admin/berita" },
+  { icon: Sparkles, label: "Hero Slider", href: "/admin/hero" },
   { icon: Calendar, label: "Agenda", href: "/admin/agenda" },
   { icon: GraduationCap, label: "Program", href: "/admin/program" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },

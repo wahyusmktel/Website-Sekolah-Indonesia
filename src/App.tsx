@@ -30,6 +30,7 @@ import AdminProgram from "./pages/admin/Program";
 import AdminGaleri from "./pages/admin/Galeri";
 import AdminKategori from "./pages/admin/Kategori";
 import AdminTestimoni from "./pages/admin/Testimoni";
+import AdminHero from "./pages/admin/Hero";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="/admin/galeri" element={<AdminGaleri />} />
               <Route path="/admin/kategori" element={<AdminKategori />} />
               <Route path="/admin/testimoni" element={<AdminTestimoni />} />
+              <Route path="/admin/hero" element={<AdminHero />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

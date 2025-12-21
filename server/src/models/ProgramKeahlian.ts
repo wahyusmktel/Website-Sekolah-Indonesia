@@ -10,6 +10,7 @@ class ProgramKeahlian extends Model {
     public image!: string;
     public icon!: string;
     public prospects!: string[];
+    public key_techs!: string[];
 }
 
 ProgramKeahlian.init(
@@ -45,6 +46,10 @@ ProgramKeahlian.init(
             allowNull: true,
         },
         prospects: {
+            type: DataTypes.JSON,
+            allowNull: true,
+        },
+        key_techs: {
             type: DataTypes.JSON,
             allowNull: true,
         },

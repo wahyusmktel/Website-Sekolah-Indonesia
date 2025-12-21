@@ -1,20 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { getImageUrl } from "@/lib/image-utils";
 import heroImg1 from "@/assets/hero-1.jpg";
 import heroImg2 from "@/assets/hero-2.jpg";
 import heroImg3 from "@/assets/hero-3.jpg";
 
-const slides = [
+// Fallback slides while loading or if empty
+const fallbackSlides = [
   {
     id: 1,
     title: "Masa Depan Digital Dimulai di Sini",
     subtitle: "SMK Nusantara menghadirkan pendidikan vokasi berbasis teknologi masa depan dengan standar industri global.",
     image: heroImg1,
     cta: "Mulai Jelajahi",
-    ctaLink: "/program",
+    cta_link: "/program",
     tag: "Inovasi Pendidikan",
   },
   {
@@ -23,7 +27,7 @@ const slides = [
     subtitle: "Fasilitas laboratorium kelas dunia dan pengajar praktisi siap membimbingmu menjadi ahli di bidangnya.",
     image: heroImg2,
     cta: "Lihat Fasilitas",
-    ctaLink: "/profil",
+    cta_link: "/profil",
     tag: "Fasilitas Unggul",
   },
   {
@@ -32,7 +36,7 @@ const slides = [
     subtitle: "Kurikulum yang dirancang khusus untuk memenuhi kebutuhan dunia kerja modern dan ekosistem startup.",
     image: heroImg3,
     cta: "Daftar Sekarang",
-    ctaLink: "/ppdb",
+    cta_link: "/ppdb",
     tag: "Karir Global",
   },
 ];
@@ -41,19 +45,39 @@ export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
+  const { data: apiSlides, isLoading } = useQuery({
+    queryKey: ['hero-slides'],
+    queryFn: async () => {
+      const response = await apiClient.get('/hero-slides');
+      return response.data;
+    }
+  });
+
+  const slides = apiSlides && apiSlides.length > 0 ? apiSlides : (isLoading ? [] : fallbackSlides);
+
   const nextSlide = useCallback(() => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   const prevSlide = useCallback(() => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || slides.length === 0) return;
     const interval = setInterval(nextSlide, 7000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide]);
+  }, [isAutoPlaying, nextSlide, slides.length]);
+
+  if (isLoading && slides.length === 0) {
+    return (
+      <div className="h-screen w-full bg-foreground flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <section className="relative h-screen min-h-[700px] overflow-hidden bg-foreground">
@@ -63,7 +87,7 @@ export function HeroSection() {
           (slide, index) =>
             index === currentSlide && (
               <motion.div
-                key={slide.id}
+                key={slide.id || index}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -72,7 +96,7 @@ export function HeroSection() {
               >
                 <div
                   className="absolute inset-0 bg-cover bg-center scale-110"
-                  style={{ backgroundImage: `url(${slide.image})` }}
+                  style={{ backgroundImage: `url(${typeof slide.image === 'string' ? getImageUrl(slide.image) : slide.image})` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-tr from-foreground via-foreground/40 to-transparent" />
                   <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
@@ -136,7 +160,7 @@ export function HeroSection() {
                       className="flex flex-wrap gap-6"
                     >
                       <Button size="xl" variant="gradient" asChild className="group">
-                        <Link to={slide.ctaLink}>
+                        <Link to={slide.cta_link}>
                           {slide.cta}
                           <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                         </Link>
@@ -153,48 +177,50 @@ export function HeroSection() {
       </AnimatePresence>
 
       {/* Navigation Controls */}
-      <div className="absolute bottom-12 right-12 z-20 flex items-center gap-6">
-        <div className="flex gap-2">
-          {slides.map((_, index) => (
+      {slides.length > 1 && (
+        <div className="absolute bottom-12 right-12 z-20 flex items-center gap-6">
+          <div className="flex gap-2">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentSlide(index);
+                  setIsAutoPlaying(false);
+                }}
+                className="group relative h-12 w-1 flex items-end bg-background/20 overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-x-0 bottom-0 bg-primary"
+                  initial={{ height: 0 }}
+                  animate={{ height: index === currentSlide ? "100%" : "0%" }}
+                  transition={{ duration: index === currentSlide ? 7 : 0.3 }}
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-4">
             <button
-              key={index}
               onClick={() => {
-                setCurrentSlide(index);
+                prevSlide();
                 setIsAutoPlaying(false);
               }}
-              className="group relative h-12 w-1 flex items-end bg-background/20 overflow-hidden"
+              className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
             >
-              <motion.div
-                className="absolute inset-x-0 bottom-0 bg-primary"
-                initial={{ height: 0 }}
-                animate={{ height: index === currentSlide ? "100%" : "0%" }}
-                transition={{ duration: index === currentSlide ? 7 : 0.3 }}
-              />
+              <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
             </button>
-          ))}
+            <button
+              onClick={() => {
+                nextSlide();
+                setIsAutoPlaying(false);
+              }}
+              className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
+            >
+              <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => {
-              prevSlide();
-              setIsAutoPlaying(false);
-            }}
-            className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
-          >
-            <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={() => {
-              nextSlide();
-              setIsAutoPlaying(false);
-            }}
-            className="w-14 h-14 rounded-2xl bg-background/10 backdrop-blur-xl border border-background/20 flex items-center justify-center text-background hover:bg-primary hover:border-primary transition-all duration-300 group"
-          >
-            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Scroll Indicator */}
       <motion.div
