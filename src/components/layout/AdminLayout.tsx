@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles } from "lucide-react";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ const menuItems = [
   { icon: Calendar, label: "Agenda", href: "/admin/agenda" },
   { icon: GraduationCap, label: "Program", href: "/admin/program" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
+  { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {

@@ -352,6 +352,53 @@ app.get('/api/programs', async (req, res) => {
     }
 });
 
+// Testimoni Routes
+app.get('/api/testimoni', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM testimoni ORDER BY id DESC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching testimoni', error });
+    }
+});
+
+app.post('/api/testimoni', async (req, res) => {
+    const { name, role, content, image } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO testimoni (name, role, content, image) VALUES (?, ?, ?, ?)',
+            [name, role, content, image]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating testimoni', error });
+    }
+});
+
+app.put('/api/testimoni/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, role, content, image } = req.body;
+    try {
+        await pool.query(
+            'UPDATE testimoni SET name = ?, role = ?, content = ?, image = ? WHERE id = ?',
+            [name, role, content, image, id]
+        );
+        res.json({ message: 'Testimoni updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating testimoni', error });
+    }
+});
+
+app.delete('/api/testimoni/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM testimoni WHERE id = ?', [id]);
+        res.json({ message: 'Testimoni deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting testimoni', error });
+    }
+});
+
 // Login Route (Basic)
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;

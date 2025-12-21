@@ -29,6 +29,7 @@ import AdminAgenda from "./pages/admin/Agenda";
 import AdminProgram from "./pages/admin/Program";
 import AdminGaleri from "./pages/admin/Galeri";
 import AdminKategori from "./pages/admin/Kategori";
+import AdminTestimoni from "./pages/admin/Testimoni";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/admin/program" element={<AdminProgram />} />
               <Route path="/admin/galeri" element={<AdminGaleri />} />
               <Route path="/admin/kategori" element={<AdminKategori />} />
+              <Route path="/admin/testimoni" element={<AdminTestimoni />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
