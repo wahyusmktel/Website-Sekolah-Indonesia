@@ -48,6 +48,7 @@ import AdminPPDB from "./pages/admin/PPDB";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/Settings";
 import AdminPrivacyPolicy from "./pages/admin/PrivacyPolicy";
+import AdminUsers from "./pages/admin/Users";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -120,6 +121,7 @@ const App = () => (
               <Route path="/admin/profile" element={<AdminProfile />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/privacy-policy" element={<AdminPrivacyPolicy />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

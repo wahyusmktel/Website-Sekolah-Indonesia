@@ -44,6 +44,7 @@ const menuItems = [
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
   { icon: ShieldCheck, label: "Kebijakan Privasi", href: "/admin/privacy-policy" },
+  { icon: Users, label: "Manajemen User", href: "/admin/users", roles: ["superadmin"] },
 ];
 
 export function AdminLayout({ children, title }: { children: ReactNode, title?: string }) {
@@ -52,6 +53,28 @@ export function AdminLayout({ children, title }: { children: ReactNode, title?: 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: settings } = useSiteSettings();
+
+  // Get current user role
+  const userStr = localStorage.getItem("adminUser");
+  const adminUser = userStr ? JSON.parse(userStr) : null;
+  const userRole = adminUser?.role || "kesiswaan"; // Fallback to lowest
+  const userName = adminUser?.name || "Administrator";
+
+  // Filter menu items based on role
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.roles) {
+      // General rules
+      if (userRole === 'superadmin') return true;
+      if (userRole === 'hubin') {
+        return ['Dashboard', 'Hubungan Industri', 'Testimoni'].includes(item.label);
+      }
+      if (userRole === 'kesiswaan') {
+        return ['Dashboard', 'Prestasi Siswa'].includes(item.label);
+      }
+      return false;
+    }
+    return item.roles.includes(userRole);
+  });
 
   // Fetch messages for notifications
   const { data: messages } = useQuery({
@@ -125,7 +148,7 @@ export function AdminLayout({ children, title }: { children: ReactNode, title?: 
           </div>
           <TooltipProvider delayDuration={0}>
             <nav className="space-y-1.5 pb-20">
-              {menuItems.map((item) => {
+              {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
                 return (
@@ -163,11 +186,11 @@ export function AdminLayout({ children, title }: { children: ReactNode, title?: 
           {sidebarOpen && (
             <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center font-black text-slate-800">
-                A
+                {userName.charAt(0)}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-black text-slate-800 truncate">Administrator</span>
-                <span className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-widest italic">Super Admin</span>
+                <span className="text-xs font-black text-slate-800 truncate">{userName}</span>
+                <span className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-widest italic">{userRole.replace(/([A-Z])/g, ' $1').trim()}</span>
               </div>
             </div>
           )}

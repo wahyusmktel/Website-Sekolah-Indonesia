@@ -74,6 +74,15 @@ const authMiddleware = (req: any, res: any, next: any) => {
     }
 };
 
+const checkRole = (roles: string[]) => {
+    return (req: any, res: any, next: any) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Forbidden: You do not have permission to access this resource' });
+        }
+        next();
+    };
+};
+
 // Ensure upload directory exists
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -212,7 +221,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: admin.id, username: admin.username, name: admin.name },
+            { id: admin.id, username: admin.username, name: admin.name, role: admin.role },
             JWT_SECRET,
             { expiresIn: '2h' }
         );
@@ -222,7 +231,8 @@ app.post('/api/auth/login', async (req, res) => {
             user: {
                 id: admin.id,
                 username: admin.username,
-                name: admin.name
+                name: admin.name,
+                role: admin.role
             }
         });
     } catch (error) {
@@ -809,19 +819,63 @@ app.delete('/api/testimoni/:id', async (req, res) => {
     }
 });
 
-// Login Route (Basic)
-app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+// -- USER MANAGEMENT ROUTES --
+app.get('/api/admin/users', authMiddleware, checkRole(['superadmin']), async (req, res) => {
     try {
-        const [rows]: any = await pool.query('SELECT * FROM admins WHERE username = ? AND password = ?', [username, password]);
-        if (rows.length > 0) {
-            const user = rows[0];
-            res.json({ id: user.id, username: user.username, name: user.name });
-        } else {
-            res.status(401).json({ message: 'Invalid credentials' });
-        }
+        const [rows] = await pool.query('SELECT id, username, name, role, created_at FROM admins ORDER BY id ASC');
+        res.json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Login error', error });
+        res.status(500).json({ message: 'Error fetching users', error });
+    }
+});
+
+app.post('/api/admin/users', authMiddleware, checkRole(['superadmin']), async (req, res) => {
+    const { username, name, password, role } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const [result] = await pool.query(
+            'INSERT INTO admins (username, name, password, role) VALUES (?, ?, ?, ?)',
+            [username, name, hashedPassword, role]
+        );
+        res.status(201).json({ id: (result as any).insertId, username, name, role });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating user', error });
+    }
+});
+
+app.put('/api/admin/users/:id', authMiddleware, checkRole(['superadmin']), async (req, res) => {
+    const { id } = req.params;
+    const { username, name, password, role } = req.body;
+    try {
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await pool.query(
+                'UPDATE admins SET username = ?, name = ?, password = ?, role = ? WHERE id = ?',
+                [username, name, hashedPassword, role, id]
+            );
+        } else {
+            await pool.query(
+                'UPDATE admins SET username = ?, name = ?, role = ? WHERE id = ?',
+                [username, name, role, id]
+            );
+        }
+        res.json({ message: 'User updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating user', error });
+    }
+});
+
+app.delete('/api/admin/users/:id', authMiddleware, checkRole(['superadmin']), async (req: any, res) => {
+    const { id } = req.params;
+    try {
+        // Prevent deleting self
+        if (parseInt(id) === req.user.id) {
+            return res.status(400).json({ message: 'Cannot delete your own account' });
+        }
+        await pool.query('DELETE FROM admins WHERE id = ?', [id]);
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting user', error });
     }
 });
 
