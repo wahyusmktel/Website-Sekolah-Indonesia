@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { GraduationCap, Users, Building, Briefcase, Award, Heart, ArrowUpRight } from "lucide-react";
-import { keunggulan } from "@/lib/dummy-data";
+import { GraduationCap, Users, Building, Briefcase, Award, Heart, ArrowUpRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
 
 const iconMap: { [key: string]: React.ElementType } = {
   GraduationCap,
@@ -15,6 +16,14 @@ const iconMap: { [key: string]: React.ElementType } = {
 export function KeunggulanSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const { data: keunggulanList = [], isLoading } = useQuery({
+    queryKey: ['keunggulan'],
+    queryFn: async () => {
+      const response = await apiClient.get('/keunggulan');
+      return response.data;
+    }
+  });
 
   return (
     <section className="py-24 relative overflow-hidden" ref={ref}>
@@ -58,48 +67,54 @@ export function KeunggulanSection() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {keunggulan.map((item, index) => {
-            const Icon = iconMap[item.icon] || GraduationCap;
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 40 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="group relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {keunggulanList.map((item: any, index: number) => {
+              const Icon = iconMap[item.icon] || GraduationCap;
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="group relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="relative p-10 rounded-[2.5rem] bg-white/40 dark:bg-foreground/5 backdrop-blur-sm border border-border group-hover:border-primary/20 transition-all duration-500 h-full flex flex-col items-start overflow-hidden">
-                  {/* Decorative Geometric Shape */}
-                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
+                  <div className="relative p-10 rounded-[2.5rem] bg-white/40 dark:bg-foreground/5 backdrop-blur-sm border border-border group-hover:border-primary/20 transition-all duration-500 h-full flex flex-col items-start overflow-hidden">
+                    {/* Decorative Geometric Shape */}
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
 
-                  <div className="w-16 h-16 rounded-2xl bg-white dark:bg-foreground/10 shadow-soft flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                    <Icon className="w-8 h-8" />
+                    <div className="w-16 h-16 rounded-2xl bg-white dark:bg-foreground/10 shadow-soft flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                      <Icon className="w-8 h-8" />
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed font-light mb-8 flex-1">
+                      {item.description}
+                    </p>
+
+                    <div className="flex items-center gap-2 text-primary text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-[-10px] group-hover:translate-x-0">
+                      Siswa Unggul <ArrowUpRight className="w-4 h-4" />
+                    </div>
+
+                    {/* Geometric background element */}
+                    <div className="absolute bottom-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                      <Icon className="w-32 h-32 rotate-12" />
+                    </div>
                   </div>
-
-                  <h3 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed font-light mb-8 flex-1">
-                    {item.description}
-                  </p>
-
-                  <div className="flex items-center gap-2 text-primary text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-[-10px] group-hover:translate-x-0">
-                    Siswa Unggul <ArrowUpRight className="w-4 h-4" />
-                  </div>
-
-                  {/* Geometric background element */}
-                  <div className="absolute bottom-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                    <Icon className="w-32 h-32 rotate-12" />
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,14 +1,24 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
-import { Calendar, Eye, ArrowRight, TrendingUp } from "lucide-react";
+import { Calendar, Eye, ArrowRight, TrendingUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { beritaList } from "@/lib/dummy-data";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { getImageUrl } from "@/lib/image-utils";
 
 export function NewsSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const { data: beritaList = [], isLoading } = useQuery({
+    queryKey: ['berita'],
+    queryFn: async () => {
+      const response = await apiClient.get('/berita');
+      return response.data;
+    }
+  });
 
   return (
     <section className="py-24 bg-white dark:bg-foreground/[0.02]" ref={ref}>
@@ -47,68 +57,82 @@ export function NewsSection() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {beritaList.slice(0, 3).map((berita, index) => (
-            <motion.article
-              key={berita.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group flex flex-col"
-            >
-              <Link to={`/berita/${berita.slug}`} className="relative h-72 rounded-[2rem] overflow-hidden mb-6 block">
-                <div className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors" />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          </div>
+        ) : beritaList.length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground italic font-medium">
+            Belum ada berita yang diterbitkan.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {beritaList.slice(0, 3).map((berita: any, index: number) => (
+              <motion.article
+                key={berita.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="group flex flex-col"
+              >
+                <Link to={`/berita/${berita.slug}`} className="relative h-72 rounded-[2rem] overflow-hidden mb-6 block">
+                  <img
+                    src={getImageUrl(berita.image)}
+                    alt={berita.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <Badge className="bg-white/90 backdrop-blur-md text-foreground border-none hover:bg-white px-4 py-1.5 rounded-full shadow-soft font-bold text-[10px] uppercase tracking-wider">
-                    {berita.category}
-                  </Badge>
-                </div>
-
-                {/* Geometric decoration */}
-                <div className="absolute top-6 right-6 w-12 h-12 border border-white/30 rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:rotate-45">
-                  <ArrowRight className="w-6 h-6 text-white" />
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">
-                <span className="flex items-center gap-2">
-                  <Calendar className="w-3 h-3 text-primary" />
-                  {new Date(berita.date).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-border" />
-                <span className="flex items-center gap-2">
-                  <Eye className="w-3 h-3 text-primary" />
-                  {berita.views} Views
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-foreground mb-4 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                <Link to={`/berita/${berita.slug}`}>
-                  {berita.title}
-                </Link>
-              </h3>
-
-              <p className="text-muted-foreground font-light line-clamp-2 mb-6 text-lg">
-                {berita.excerpt}
-              </p>
-
-              <div className="mt-auto pt-6 border-t border-border/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-primary">
-                    AN
+                  <div className="absolute top-6 left-6 flex flex-col gap-2">
+                    <Badge className="bg-white/90 backdrop-blur-md text-foreground border-none hover:bg-white px-4 py-1.5 rounded-full shadow-soft font-bold text-[10px] uppercase tracking-wider">
+                      {berita.category}
+                    </Badge>
                   </div>
-                  <span className="text-sm font-bold text-foreground/70">{berita.author}</span>
+
+                  {/* Geometric decoration */}
+                  <div className="absolute top-6 right-6 w-12 h-12 border border-white/30 rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:rotate-45">
+                    <ArrowRight className="w-6 h-6 text-white" />
+                  </div>
+                </Link>
+
+                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-3 h-3 text-primary" />
+                    {new Date(berita.date || berita.created_at).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-border" />
+                  <span className="flex items-center gap-2">
+                    <Eye className="w-3 h-3 text-primary" />
+                    {berita.views || 0} Views
+                  </span>
                 </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
+
+                <h3 className="text-2xl font-bold text-foreground mb-4 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                  <Link to={`/berita/${berita.slug}`}>
+                    {berita.title}
+                  </Link>
+                </h3>
+
+                <p className="text-muted-foreground font-light line-clamp-2 mb-6 text-lg">
+                  {berita.excerpt}
+                </p>
+
+                <div className="mt-auto pt-6 border-t border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-primary">
+                      {berita.author?.substring(0, 2).toUpperCase() || 'AD'}
+                    </div>
+                    <span className="text-sm font-bold text-foreground/70">{berita.author || 'Admin'}</span>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

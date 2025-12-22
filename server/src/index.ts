@@ -64,6 +64,13 @@ app.get('/api/stats', async (req, res) => {
         const [[{ counts: programs }]] = await pool.query('SELECT COUNT(*) as counts FROM program_keahlian') as any;
         const [[{ counts: albums }]] = await pool.query('SELECT COUNT(*) as counts FROM album') as any;
         const [[{ counts: heroSlides }]] = await pool.query('SELECT COUNT(*) as counts FROM hero_slides') as any;
+        const [[{ counts: keunggulan }]] = await pool.query('SELECT COUNT(*) as counts FROM keunggulan') as any;
+        const [[{ counts: sambutan }]] = await pool.query('SELECT COUNT(*) as counts FROM sambutan') as any;
+        const [[{ counts: statistik }]] = await pool.query('SELECT COUNT(*) as counts FROM statistik') as any;
+
+        // Try to get specific "siswa" count from statistik table if it exists
+        const [siswaRows]: any = await pool.query('SELECT value FROM statistik WHERE label LIKE "%Siswa%" LIMIT 1');
+        const siswaValue = siswaRows.length > 0 ? siswaRows[0].value : 1250;
 
         res.json({
             berita,
@@ -72,7 +79,10 @@ app.get('/api/stats', async (req, res) => {
             programs,
             albums,
             heroSlides,
-            siswa: 1250, // Static for now or fetch from another table
+            keunggulan,
+            sambutan,
+            statistik,
+            siswa: siswaValue,
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching stats', error });
@@ -128,6 +138,137 @@ app.delete('/api/hero-slides/:id', async (req, res) => {
         res.json({ message: 'Hero slide deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting hero slide', error });
+    }
+});
+
+// Keunggulan Routes
+app.get('/api/keunggulan', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM keunggulan ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching keunggulan', error });
+    }
+});
+
+app.post('/api/keunggulan', async (req, res) => {
+    const { icon, title, description } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO keunggulan (icon, title, description) VALUES (?, ?, ?)',
+            [icon, title, description]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating keunggulan', error });
+    }
+});
+
+app.put('/api/keunggulan/:id', async (req, res) => {
+    const { id } = req.params;
+    const { icon, title, description } = req.body;
+    try {
+        await pool.query(
+            'UPDATE keunggulan SET icon = ?, title = ?, description = ? WHERE id = ?',
+            [icon, title, description, id]
+        );
+        res.json({ message: 'Keunggulan updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating keunggulan', error });
+    }
+});
+
+app.delete('/api/keunggulan/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM keunggulan WHERE id = ?', [id]);
+        res.json({ message: 'Keunggulan deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting keunggulan', error });
+    }
+});
+
+// Sambutan Routes
+app.get('/api/sambutan', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM sambutan LIMIT 1');
+        res.json((rows as any)[0] || null);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching sambutan', error });
+    }
+});
+
+app.post('/api/sambutan', async (req, res) => {
+    const { principal_name, principal_role, principal_image, title, greeting, content, quote_footer } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO sambutan (principal_name, principal_role, principal_image, title, greeting, content, quote_footer) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [principal_name, principal_role, principal_image, title, greeting, content, quote_footer]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating sambutan', error });
+    }
+});
+
+app.put('/api/sambutan/:id', async (req, res) => {
+    const { id } = req.params;
+    const { principal_name, principal_role, principal_image, title, greeting, content, quote_footer } = req.body;
+    try {
+        await pool.query(
+            'UPDATE sambutan SET principal_name = ?, principal_role = ?, principal_image = ?, title = ?, greeting = ?, content = ?, quote_footer = ? WHERE id = ?',
+            [principal_name, principal_role, principal_image, title, greeting, content, quote_footer, id]
+        );
+        res.json({ message: 'Sambutan updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating sambutan', error });
+    }
+});
+
+// Statistik Routes
+app.get('/api/statistik', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM statistik ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching statistik', error });
+    }
+});
+
+app.post('/api/statistik', async (req, res) => {
+    const { label, value, icon, suffix } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO statistik (label, value, icon, suffix) VALUES (?, ?, ?, ?)',
+            [label, value, icon, suffix]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating statistik', error });
+    }
+});
+
+app.put('/api/statistik/:id', async (req, res) => {
+    const { id } = req.params;
+    const { label, value, icon, suffix } = req.body;
+    try {
+        await pool.query(
+            'UPDATE statistik SET label = ?, value = ?, icon = ?, suffix = ? WHERE id = ?',
+            [label, value, icon, suffix, id]
+        );
+        res.json({ message: 'Statistik updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating statistik', error });
+    }
+});
+
+app.delete('/api/statistik/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM statistik WHERE id = ?', [id]);
+        res.json({ message: 'Statistik deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting statistik', error });
     }
 });
 
