@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -113,7 +113,7 @@ const Guru = () => {
     useEffect(() => {
         const fetchGuru = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/guru");
+                const response = await apiClient.get("/guru");
                 setTeachers(response.data);
             } catch (error) {
                 console.error("Error fetching guru:", error);

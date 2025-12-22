@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { motion, useScroll } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, CheckCircle2, MessageCircle, Calendar, CreditCard,
@@ -16,59 +16,60 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ppdbTimeline, biayaPPDB } from "@/lib/dummy-data";
+import apiClient from "@/lib/api-client";
+
+// Icon mapping for dynamic content
+const iconMap: any = {
+  Trophy, Zap, ShieldCheck, Rocket, FileText, Wallet, Info, CheckCircle2
+};
 
 const PPDB = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
+  const [ppdbData, setPpdbData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const admissionPaths = [
-    {
-      title: "Jalur Prestasi",
-      description: "Bagi siswa dengan prestasi akademik (Rapor) atau non-akademik (Lomba/Seni/Olahraga).",
-      icon: Trophy,
-      benefit: "Bebas Biaya Pendaftaran",
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
-    {
-      title: "Jalur Reguler",
-      description: "Penerimaan umum melalui seleksi tes minat bakat dan wawancara kompetensi.",
-      icon: Zap,
-      benefit: "Kuota Terbatas",
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-    },
-    {
-      title: "Jalur Afirmasi",
-      description: "Khusus bagi calon siswa dari keluarga prasejahtera (KIP/PKH) yang bersemangat belajar.",
-      icon: ShieldCheck,
-      benefit: "Subsidi Biaya Pendidikan",
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await apiClient.get("/ppdb-info");
+        setPpdbData(response.data);
+        // console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching PPDB info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const requiredDocuments = [
-    { title: "Fotokopi Ijazah / SKL", status: "Wajib" },
-    { title: "Fotokopi Akta Kelahiran", status: "Wajib" },
-    { title: "Fotokopi Kartu Keluarga", status: "Wajib" },
-    { title: "Pas Foto 3x4 (4 Lembar)", status: "Wajib" },
-    { title: "Sertifikat Prestasi", status: "Opsional" },
-    { title: "Kartu KIP/PKH", status: "Jalur Afirmasi" },
-  ];
+  if (loading) {
+    return (
+      <PublicLayout>
+        <div className="min-h-screen flex items-center justify-center bg-foreground">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+        </div>
+      </PublicLayout>
+    );
+  }
+
+  // Prevent crash if data is empty object
+  const data = ppdbData || {};
+  if (!data.academic_year) return (
+    <PublicLayout>
+      <div className="min-h-screen flex items-center justify-center bg-foreground text-white">
+        <p>Belum ada informasi PPDB.</p>
+      </div>
+    </PublicLayout>
+  );
 
   return (
     <>
       <Helmet>
-        <title>PPDB 2026/2027 - SMK Nusantara</title>
-        <meta name="description" content="Pendaftaran Peserta Didik Baru (PPDB) SMK Nusantara Tahun Pelajaran 2026/2027. Wujudkan mimpimu bersama sekolah teknologi unggulan." />
+        <title>PPDB {ppdbData.academic_year} - SMK Nusantara</title>
+        <meta name="description" content={ppdbData.description} />
       </Helmet>
       <PublicLayout>
-        <div ref={containerRef} className="relative">
+        <div className="relative">
 
           {/* 1. ULTRA MODERN HERO */}
           <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-foreground py-32">
@@ -88,7 +89,7 @@ const PPDB = () => {
                 >
                   <Rocket className="w-4 h-4 text-primary animate-bounce" />
                   <span className="text-white text-[10px] font-black uppercase tracking-[0.3em]">
-                    Enrollment Now Open — <span className="text-primary italic">Batch 2026/2027</span>
+                    Enrollment Now {ppdbData.is_active ? "Open" : "Closed"} — <span className="text-primary italic">Batch {ppdbData.academic_year}</span>
                   </span>
                 </motion.div>
 
@@ -108,7 +109,7 @@ const PPDB = () => {
                   transition={{ duration: 0.8, delay: 0.4 }}
                   className="text-white/50 text-xl md:text-2xl font-light max-w-2xl mx-auto mb-16 leading-relaxed"
                 >
-                  Bergabunglah dengan ekosistem pendidikan futuristik yang menghubungkan potensi Anda langsung dengan industri teknologi global.
+                  {ppdbData.description}
                 </motion.p>
 
                 <motion.div
@@ -117,13 +118,20 @@ const PPDB = () => {
                   transition={{ duration: 0.8, delay: 0.6 }}
                   className="flex flex-col sm:flex-row gap-6 justify-center items-center"
                 >
-                  <Button size="xl" variant="hero" className="rounded-full px-12 h-20 group text-xs font-black uppercase tracking-widest shadow-glow" asChild>
-                    <a href="https://wa.me/628123456789" target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="w-5 h-5 mr-3" />
-                      Daftar via WhatsApp Sekarang
-                      <ArrowUpRight className="w-4 h-4 ml-3 opacity-50 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  </Button>
+                  {ppdbData.is_active ? (
+                    <Button size="xl" variant="hero" className="rounded-full px-12 h-20 group text-xs font-black uppercase tracking-widest shadow-glow" asChild>
+                      <a href={ppdbData.registration_link} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle className="w-5 h-5 mr-3" />
+                        Daftar via WhatsApp Sekarang
+                        <ArrowUpRight className="w-4 h-4 ml-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button size="xl" variant="hero" disabled className="rounded-full px-12 h-20 group text-xs font-black uppercase tracking-widest shadow-none bg-gray-600 opacity-50 cursor-not-allowed">
+                      Pendaftaran Ditutup
+                    </Button>
+                  )}
+
                   <Button size="xl" variant="hero-outline" className="rounded-full px-12 h-20 text-xs font-black uppercase tracking-widest border-white/20 hover:bg-white/10" asChild>
                     <Link to="/kontak">Panduan Pendaftaran</Link>
                   </Button>
@@ -166,34 +174,37 @@ const PPDB = () => {
                 <Badge variant="outline" className="mb-4 px-6 py-2 rounded-full border-primary/20 text-primary font-black uppercase tracking-widest text-[10px]">
                   How to Enter
                 </Badge>
-                <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">Jalur Pendaftaran <br /> <span className="text-primary italic">Batch 01</span></h2>
+                <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">Jalur Pendaftaran <br /> <span className="text-primary italic">Batch {ppdbData.academic_year}</span></h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                {admissionPaths.map((path, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className="group p-12 rounded-[3.5rem] bg-white dark:bg-foreground/5 border border-border hover:border-primary/40 transition-all duration-500 shadow-soft hover:shadow-glow relative overflow-hidden"
-                  >
-                    <div className={`w-16 h-16 rounded-[1.5rem] ${path.bg} flex items-center justify-center ${path.color} mb-8 group-hover:scale-110 transition-transform`}>
-                      <path.icon className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-black text-foreground mb-4 uppercase tracking-tighter italic">{path.title}</h3>
-                    <p className="text-muted-foreground font-light text-lg leading-relaxed mb-8">
-                      {path.description}
-                    </p>
-                    <div className="pt-8 border-t border-border flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{path.benefit}</span>
-                      <div className="w-10 h-10 rounded-full bg-foreground/5 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
-                        <ArrowRight className="w-4 h-4" />
+                {(ppdbData.admission_pathways || []).map((path: any, index: number) => {
+                  const Icon = iconMap[path.icon] || Zap;
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      className="group p-12 rounded-[3.5rem] bg-white dark:bg-foreground/5 border border-border hover:border-primary/40 transition-all duration-500 shadow-soft hover:shadow-glow relative overflow-hidden"
+                    >
+                      <div className={`w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform`}>
+                        <Icon className="w-8 h-8" />
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                      <h3 className="text-2xl font-black text-foreground mb-4 uppercase tracking-tighter italic">{path.title}</h3>
+                      <p className="text-muted-foreground font-light text-lg leading-relaxed mb-8">
+                        {path.description}
+                      </p>
+                      <div className="pt-8 border-t border-border flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{path.benefit}</span>
+                        <div className="w-10 h-10 rounded-full bg-foreground/5 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             </div>
           </section>
@@ -208,7 +219,7 @@ const PPDB = () => {
               <div className="flex flex-col lg:flex-row items-center justify-between mb-24 gap-12 text-center lg:text-left">
                 <div>
                   <span className="text-primary text-xs font-black uppercase tracking-[0.3em] mb-4 block">Strategic Roadmap</span>
-                  <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">Timeline Seleksi <br /> <span className="text-primary italic">PPDB 2026</span></h2>
+                  <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">Timeline Seleksi <br /> <span className="text-primary italic">PPDB {ppdbData.academic_year?.split('/')[0]}</span></h2>
                 </div>
                 <div className="max-w-md">
                   <p className="text-white/40 text-lg font-light leading-relaxed">
@@ -221,9 +232,9 @@ const PPDB = () => {
                 <div className="relative space-y-12">
                   <div className="absolute left-[31px] md:left-1/2 top-0 bottom-0 w-px bg-white/10 -translate-x-1/2 hidden md:block" />
 
-                  {ppdbTimeline.map((item, index) => (
+                  {(ppdbData.timeline || []).map((item: any, index: number) => (
                     <motion.div
-                      key={item.step}
+                      key={index}
                       initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
@@ -242,7 +253,7 @@ const PPDB = () => {
 
                       <div className="relative z-10">
                         <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-glow rotate-45 group-hover:rotate-[225deg] transition-transform duration-700">
-                          <div className="-rotate-45">{item.step}</div>
+                          <div className="-rotate-45">{item.step || index + 1}</div>
                         </div>
                       </div>
 
@@ -284,7 +295,7 @@ const PPDB = () => {
                   </div>
 
                   <div className="grid gap-4">
-                    {requiredDocuments.map((doc, i) => (
+                    {(ppdbData.required_documents || []).map((doc: any, i: number) => (
                       <div key={i} className="flex items-center justify-between p-6 rounded-2xl bg-foreground/5 dark:bg-white/5 border border-border group hover:bg-foreground hover:text-white transition-all duration-300">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:bg-white group-hover:text-primary transition-colors font-bold text-xs">
@@ -346,7 +357,7 @@ const PPDB = () => {
                     </div>
 
                     <div className="grid gap-6 mb-16">
-                      {biayaPPDB.map((item, index) => (
+                      {(ppdbData.fees || []).map((item: any, index: number) => (
                         <div key={index} className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
@@ -367,12 +378,12 @@ const PPDB = () => {
                         <div>
                           <span className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-2 block">Grand Total Investment</span>
                           <h4 className="text-5xl font-black text-white tracking-tighter items-baseline flex gap-3 leading-none">
-                            Rp <span className="text-white">{biayaPPDB.reduce((sum, item) => sum + item.biaya, 0).toLocaleString('id-ID')}</span>
+                            Rp <span className="text-white">{(ppdbData.fees || []).reduce((sum: number, item: any) => sum + item.biaya, 0).toLocaleString('id-ID')}</span>
                             <span className="text-xs font-black uppercase opacity-60">incl. Tax</span>
                           </h4>
                         </div>
-                        <Button size="lg" className="rounded-full bg-white text-primary font-black uppercase tracking-widest text-[10px] h-16 px-10 hover:bg-foreground hover:text-white transition-all shadow-xl">
-                          Tanyakan Cicilan via WA
+                        <Button size="lg" className="rounded-full bg-white text-primary font-black uppercase tracking-widest text-[10px] h-16 px-10 hover:bg-foreground hover:text-white transition-all shadow-xl" asChild>
+                          <a href={ppdbData.registration_link} target="_blank">Tanyakan Cicilan via WA</a>
                         </Button>
                       </div>
                     </div>
@@ -382,7 +393,7 @@ const PPDB = () => {
                 <div className="mt-12 flex items-start gap-4 p-8 rounded-3xl bg-primary/5 border border-primary/10">
                   <Info className="w-6 h-6 text-primary shrink-0" />
                   <p className="text-sm font-light text-muted-foreground leading-relaxed italic">
-                    * Seluruh biaya pendaftaran Batch 01 mendapatkan jaminan akses eksklusif ke program inkubasi startup sekolah dan lab industri 24/7. Pembayaran dapat diangsur hingga 3 kali selama semester ganjil.
+                    * Seluruh biaya pendaftaran Batch {ppdbData.academic_year} mendapatkan jaminan akses eksklusif ke program inkubasi startup sekolah dan lab industri 24/7. Pembayaran dapat diangsur hingga 3 kali selama semester ganjil.
                   </p>
                 </div>
               </div>
@@ -398,12 +409,7 @@ const PPDB = () => {
               </div>
 
               <Accordion type="single" collapsible className="w-full space-y-4">
-                {[
-                  { q: "Kapan penutupan pendaftaran Gelombang 1?", a: "Pendaftaran Gelombang 1 (Early Bird) akan ditutup pada akhir Maret 2026 atau ketika kuota khusus prestasi telah terpenuhi." },
-                  { q: "Apakah ada tes fisik untuk masuk SMK Nusantara?", a: "Untuk jurusan tertentu sepert Teknik Komputer, kami melakukan tes penglihatan (warna) untuk memastikan kompetensi teknis di lab." },
-                  { q: "Mungkinkah mendaftar jika Ijazah belum keluar?", a: "Tentu. Anda dapat mendaftar menggunakan Rapor Semester 1-5 atau Surat Keterangan Lulus (SKL) sementara." },
-                  { q: "Apa keuntungan Jalur Prestasi?", a: "Selain pembebasan biaya pendaftaran, jalur prestasi berhak mengikuti program beasiswa penuh untuk SPP tahun pertama." }
-                ].map((faq, i) => (
+                {(ppdbData.faq || []).map((faq: any, i: number) => (
                   <AccordionItem key={i} value={`item-${i}`} className="border border-border rounded-[2rem] px-8 bg-white dark:bg-foreground/5 shadow-soft overflow-hidden group">
                     <AccordionTrigger className="text-lg font-black text-left hover:no-underline hover:text-primary transition-colors py-8 uppercase tracking-tighter">
                       {faq.q}
@@ -443,7 +449,7 @@ const PPDB = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
                     <Button size="xl" variant="hero" className="rounded-full px-16 h-24 group text-sm font-black uppercase tracking-widest shadow-glow w-full sm:w-auto" asChild>
-                      <a href="https://wa.me/628123456789" target="_blank" rel="noopener noreferrer">
+                      <a href={ppdbData.registration_link} target="_blank" rel="noopener noreferrer">
                         Join WhatsApp Group PPDB
                         <ArrowUpRight className="w-5 h-5 ml-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       </a>

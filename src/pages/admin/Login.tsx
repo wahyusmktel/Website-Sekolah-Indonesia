@@ -22,10 +22,11 @@ const AdminLogin = () => {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      const response = await apiClient.post('/login', data);
+      const response = await apiClient.post('/auth/login', data);
+      localStorage.setItem("adminToken", response.data.token);
       localStorage.setItem("adminAuth", "true");
-      localStorage.setItem("adminUser", JSON.stringify(response.data));
-      toast({ title: "Login Berhasil", description: `Selamat datang, ${response.data.name}!` });
+      localStorage.setItem("adminUser", JSON.stringify(response.data.user));
+      toast({ title: "Login Berhasil", description: `Selamat datang, ${response.data.user.name}!` });
       navigate("/admin/dashboard");
     } catch (error: any) {
       toast({

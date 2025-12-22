@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Users, Newspaper, Image as ImageIcon, Calendar, TrendingUp, Eye, ArrowUpRight, ArrowDownRight, Clock, Plus, Zap, LayoutDashboard, Bell } from "lucide-react";
+import { Users, Newspaper, Trophy, MessageSquare, Calendar, TrendingUp, Eye, ArrowUpRight, ArrowDownRight, Clock, Plus, Zap, LayoutDashboard, Bell, Image } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,37 +42,37 @@ const AdminDashboard = () => {
       icon: Users,
       label: "Total Siswa",
       value: statsData?.siswa || 0,
-      trend: "+2.5%",
+      trend: "Data Aktif",
       isUp: true,
       gradient: "from-blue-500/20 to-blue-600/5",
       iconColor: "text-blue-500"
     },
     {
-      icon: Newspaper,
-      label: "Artikel Berita",
-      value: statsData?.berita || 0,
-      trend: "+12",
-      isUp: true,
-      gradient: "from-primary/20 to-primary/5",
-      iconColor: "text-primary"
-    },
-    {
-      icon: ImageIcon,
-      label: "Media Galeri",
-      value: statsData?.galeri || 0,
-      trend: "+5",
+      icon: Trophy,
+      label: "Prestasi Siswa",
+      value: statsData?.prestasi || 0,
+      trend: "Total Record",
       isUp: true,
       gradient: "from-amber-500/20 to-amber-600/5",
       iconColor: "text-amber-500"
     },
     {
-      icon: Calendar,
-      label: "Agenda Aktif",
-      value: statsData?.agenda || 0,
-      trend: "-2",
-      isUp: false,
-      gradient: "from-emerald-500/20 to-emerald-600/5",
-      iconColor: "text-emerald-500"
+      icon: MessageSquare,
+      label: "Pesan Baru",
+      value: statsData?.messages || 0,
+      trend: "Perlu Cek",
+      isUp: statsData?.messages > 0,
+      gradient: "from-rose-500/20 to-rose-600/5",
+      iconColor: "text-rose-500"
+    },
+    {
+      icon: Newspaper,
+      label: "Artikel Berita",
+      value: statsData?.berita || 0,
+      trend: "Publikasi",
+      isUp: true,
+      gradient: "from-primary/20 to-primary/5",
+      iconColor: "text-primary"
     },
   ];
 
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: 'Create Post', icon: Plus },
-                { label: 'Media Library', icon: ImageIcon },
+                { label: 'Media Library', icon: Image },
                 { label: 'Event Planner', icon: Calendar },
                 { label: 'User Analytics', icon: Users }
               ].map((link) => (

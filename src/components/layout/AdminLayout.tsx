@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info } from "lucide-react";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ const menuItems = [
   { icon: Handshake, label: "Hubungan Industri", href: "/admin/hubungan-industri" },
   { icon: Trophy, label: "Prestasi Siswa", href: "/admin/prestasi" },
   { icon: Mail, label: "Pesan Masuk", href: "/admin/messages" },
+  { icon: FileText, label: "Manajemen PPDB", href: "/admin/ppdb" },
   { icon: Info, label: "Info Kontak", href: "/admin/contact-info" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
@@ -40,6 +41,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = () => {
     localStorage.removeItem("adminAuth");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
     navigate("/admin/login");
   };
 

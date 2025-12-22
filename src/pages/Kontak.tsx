@@ -10,7 +10,7 @@ import { infoSekolah } from "@/lib/dummy-data";
 import { useToast } from "@/hooks/use-toast";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 
 interface ContactForm {
   name: string;
@@ -28,7 +28,7 @@ const Kontak = () => {
   useEffect(() => {
     const fetchContactInfo = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/contact-info");
+        const { data } = await apiClient.get("/contact-info");
         setContactInfo(data);
       } catch (error) {
         console.error("Error fetching contact info:", error);
@@ -41,7 +41,7 @@ const Kontak = () => {
 
   const onSubmit = async (data: ContactForm) => {
     try {
-      await axios.post("http://localhost:5000/api/messages", data);
+      await apiClient.post("/messages", data);
       toast({
         title: "🚀 Pesan Berhasil Terkirim",
         description: "Terima kasih! Tim administrasi kami akan segera menghubungi Anda kembali.",

@@ -10,7 +10,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import NotFound from "./NotFound";
 
@@ -23,11 +23,11 @@ const PrestasiDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:5000/api/prestasi/${slug}`);
+                const { data } = await apiClient.get(`/prestasi/${slug}`);
                 setAchievement(data);
 
                 // Fetch related (all for now then filter)
-                const { data: all } = await axios.get("http://localhost:5000/api/prestasi");
+                const { data: all } = await apiClient.get("/prestasi");
                 setRelatedAchievements(all.filter((p: any) => p.category === data.category && p.id !== data.id).slice(0, 2));
             } catch (error) {
                 console.error("Error fetching achievement detail:", error);

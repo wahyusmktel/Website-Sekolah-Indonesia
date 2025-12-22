@@ -7,7 +7,7 @@ import {
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -54,7 +54,7 @@ const StrukturOrganisasi = () => {
     useEffect(() => {
         const fetchStruktur = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/struktur");
+                const response = await apiClient.get("/struktur");
                 setMembers(response.data);
             } catch (error) {
                 console.error("Error fetching struktur:", error);

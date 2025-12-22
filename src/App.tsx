@@ -43,6 +43,7 @@ import AdminHubunganIndustri from "./pages/admin/HubunganIndustri";
 import AdminPrestasi from "./pages/admin/Prestasi";
 import AdminMessages from "./pages/admin/Messages";
 import AdminContactInfo from "./pages/admin/ContactInfo";
+import AdminPPDB from "./pages/admin/PPDB";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -98,6 +99,7 @@ const App = () => (
               <Route path="/admin/guru" element={<AdminGuru />} />
               <Route path="/admin/fasilitas" element={<AdminFasilitas />} />
               <Route path="/admin/hubungan-industri" element={<AdminHubunganIndustri />} />
+              <Route path="/admin/ppdb" element={<AdminPPDB />} />
               <Route path="/admin/prestasi" element={<AdminPrestasi />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/contact-info" element={<AdminContactInfo />} />

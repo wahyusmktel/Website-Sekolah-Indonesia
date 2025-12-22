@@ -9,7 +9,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 
 interface IndustryData {
@@ -29,7 +29,7 @@ const HubunganIndustri = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/hubungan-industri");
+                const response = await apiClient.get("/hubungan-industri");
                 setData(response.data);
             } catch (error) {
                 console.error("Error fetching hubungan industri data:", error);

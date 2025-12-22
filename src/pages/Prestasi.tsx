@@ -11,7 +11,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 
 const Prestasi = () => {
@@ -23,7 +23,7 @@ const Prestasi = () => {
     useEffect(() => {
         const fetchPrestasi = async () => {
             try {
-                const { data } = await axios.get("http://localhost:5000/api/prestasi");
+                const { data } = await apiClient.get("/prestasi");
                 setPrestasiList(data);
             } catch (error) {
                 console.error("Error fetching prestasi:", error);

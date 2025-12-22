@@ -1,5 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import pool from './config/db';
 import multer from 'multer';
@@ -10,9 +15,64 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 
-app.use(cors());
-app.use(express.json());
+// -- SECURITY MIDDLEWARE --
+// 1. Helmet for secure headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow images to be loaded
+}));
+
+// 2. CORS configuration
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080'
+].filter(Boolean) as string[];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('CORS Policy Error'), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
+
+// 3. Rate Limiting to prevent brute force
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+app.use('/api/', limiter);
+
+// 4. HPP - HTTP Parameter Pollution protection
+app.use(hpp());
+
+app.use(express.json({ limit: '10mb' })); // Limit body size
+
+// -- AUTH MIDDLEWARE --
+const authMiddleware = (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Unauthorized: No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+    }
+};
 
 // Ensure upload directory exists
 const uploadDir = path.join(__dirname, '../uploads');
@@ -36,8 +96,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Upload Route
-app.post('/api/upload', upload.single('image'), (req, res) => {
+// -- AUTHENTICATION & PROTECTION --
+// Protect all data-modifying routes and sensitive data
+app.post(/^\/api\/.*/, (req, res, next) => {
+    // Skip auth for login
+    if (req.path === '/api/auth/login') return next();
+    authMiddleware(req, res, next);
+});
+app.put(/^\/api\/.*/, authMiddleware);
+app.patch(/^\/api\/.*/, authMiddleware);
+app.delete(/^\/api\/.*/, authMiddleware);
+
+// Protect sensitive GET routes
+app.get('/api/messages', authMiddleware);
+
+// Upload Route (Protected)
+app.post('/api/upload', authMiddleware, upload.single('image'), (req, res) => {
     console.log('Upload request received:', req.file);
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -46,8 +120,8 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     res.json({ url: fileUrl });
 });
 
-// Multiple Upload Route
-app.post('/api/upload-multiple', upload.array('images', 20), (req, res) => {
+// Multiple Upload Route (Protected)
+app.post('/api/upload-multiple', authMiddleware, upload.array('images', 20), (req, res) => {
     if (!req.files || (req.files as any).length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
     }
@@ -55,8 +129,50 @@ app.post('/api/upload-multiple', upload.array('images', 20), (req, res) => {
     const urls = files.map(file => `/uploads/${file.filename}`);
     res.json({ urls });
 });
+// Basic Route
+app.get('/', (req, res) => {
+    res.send('School Website API with Enhanced Security is running...');
+});
 
-app.get('/api/stats', async (req, res) => {
+// -- AUTH ROUTES --
+app.post('/api/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const [rows]: any = await pool.query('SELECT * FROM admins WHERE username = ?', [username]);
+        if (rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const admin = rows[0];
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: admin.id, username: admin.username, name: admin.name },
+            JWT_SECRET,
+            { expiresIn: '2h' }
+        );
+
+        res.json({
+            token,
+            user: {
+                id: admin.id,
+                username: admin.username,
+                name: admin.name
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+});
+
+app.get('/api/auth/verify', authMiddleware, (req: any, res) => {
+    res.json({ valid: true, user: req.user });
+});
+
+app.get('/api/stats', authMiddleware, async (req, res) => {
     try {
         const [[{ counts: berita }]] = await pool.query('SELECT COUNT(*) as counts FROM berita') as any;
         const [[{ counts: agenda }]] = await pool.query('SELECT COUNT(*) as counts FROM agenda') as any;
@@ -68,10 +184,12 @@ app.get('/api/stats', async (req, res) => {
         const [[{ counts: sambutan }]] = await pool.query('SELECT COUNT(*) as counts FROM sambutan') as any;
         const [[{ counts: statistik }]] = await pool.query('SELECT COUNT(*) as counts FROM statistik') as any;
         const [[{ counts: fasilitas }]] = await pool.query('SELECT COUNT(*) as counts FROM fasilitas') as any;
+        const [[{ counts: prestasi }]] = await pool.query('SELECT COUNT(*) as counts FROM prestasi') as any;
+        const [[{ counts: messages }]] = await pool.query('SELECT COUNT(*) as counts FROM messages WHERE is_read = 0') as any;
 
         // Try to get specific "siswa" count from statistik table if it exists
         const [siswaRows]: any = await pool.query('SELECT value FROM statistik WHERE label LIKE "%Siswa%" LIMIT 1');
-        const siswaValue = siswaRows.length > 0 ? siswaRows[0].value : 1250;
+        const siswaValue = siswaRows.length > 0 ? siswaRows[0].value : 0;
 
         res.json({
             berita,
@@ -81,10 +199,10 @@ app.get('/api/stats', async (req, res) => {
             albums,
             heroSlides,
             keunggulan,
-            sambutan,
-            statistik,
+            prestasi,
+            messages,
             fasilitas,
-            siswa: siswaValue,
+            siswa: parseInt(siswaValue as string) || 0,
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching stats', error });
@@ -1207,6 +1325,105 @@ app.put('/api/contact-info/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error updating contact info', error });
     }
+});
+
+// PPDB Info Routes
+app.get('/api/ppdb-info', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM PPDBInfos LIMIT 1');
+        const data = (rows as any[])[0];
+
+        if (data) {
+            // Helper to parse if string (mysql2 might return JSON columns as strings)
+            const parse = (val: any) => {
+                if (typeof val === 'string') {
+                    try { return JSON.parse(val); } catch (e) { return []; }
+                }
+                return val || [];
+            };
+
+            data.admission_pathways = parse(data.admission_pathways);
+            data.timeline = parse(data.timeline);
+            data.required_documents = parse(data.required_documents);
+            data.fees = parse(data.fees);
+            data.faq = parse(data.faq);
+
+            res.json(data);
+        } else {
+            res.json({});
+        }
+    } catch (error) {
+        console.error("Error fetching PPDB info:", error);
+        res.status(500).json({ message: 'Error fetching ppdb info', error });
+    }
+});
+
+app.put('/api/ppdb-info', async (req, res) => {
+    const { academic_year, registration_link, contact_person, description, admission_pathways, timeline, required_documents, fees, faq, is_active } = req.body;
+    try {
+        // Check if exists
+        const [rows] = await pool.query('SELECT id FROM PPDBInfos LIMIT 1') as any[];
+        if (rows.length > 0) {
+            await pool.query(
+                `UPDATE PPDBInfos SET 
+                    academic_year = ?, 
+                    registration_link = ?, 
+                    contact_person = ?, 
+                    description = ?, 
+                    admission_pathways = ?, 
+                    timeline = ?, 
+                    required_documents = ?, 
+                    fees = ?, 
+                    faq = ?, 
+                    is_active = ?, 
+                    updatedAt = NOW() 
+                WHERE id = ?`,
+                [
+                    academic_year,
+                    registration_link,
+                    contact_person,
+                    description,
+                    JSON.stringify(admission_pathways),
+                    JSON.stringify(timeline),
+                    JSON.stringify(required_documents),
+                    JSON.stringify(fees),
+                    JSON.stringify(faq),
+                    is_active,
+                    rows[0].id
+                ]
+            );
+        } else {
+            await pool.query(
+                `INSERT INTO PPDBInfos (academic_year, registration_link, contact_person, description, admission_pathways, timeline, required_documents, fees, faq, is_active, createdAt, updatedAt) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+                [
+                    academic_year,
+                    registration_link,
+                    contact_person,
+                    description,
+                    JSON.stringify(admission_pathways),
+                    JSON.stringify(timeline),
+                    JSON.stringify(required_documents),
+                    JSON.stringify(fees),
+                    JSON.stringify(faq),
+                    is_active
+                ]
+            );
+        }
+        res.json({ message: 'PPDB info updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating ppdb info', error });
+    }
+});
+
+// -- GLOBAL ERROR HANDLER --
+app.use((err: any, req: any, res: any, next: any) => {
+    console.error('Unhandled Error:', err);
+    res.status(err.status || 500).json({
+        message: 'Internal server error',
+        // Only show error details in development if needed
+        error: process.env.NODE_ENV === 'development' ? err.message : {}
+    });
 });
 
 app.listen(PORT, () => {

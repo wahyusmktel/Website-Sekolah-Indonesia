@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 
 interface Facility {
@@ -33,7 +33,7 @@ const Fasilitas = () => {
     useEffect(() => {
         const fetchFacilities = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/fasilitas");
+                const response = await apiClient.get("/fasilitas");
                 setFacilities(response.data);
             } catch (error) {
                 console.error("Error fetching facilities:", error);

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Target, Eye, History, Sparkles, BookOpen, Users, Rocket, Trophy, CheckCircle2, GraduationCap, Building, Briefcase, Award, Heart } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/api-client";
 
 interface ProfilData {
   hero_title: string;
@@ -72,9 +72,9 @@ const Profil = () => {
     const fetchData = async () => {
       try {
         const [profilRes, keunggulanRes, sambutanRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/profil"),
-          axios.get("http://localhost:5000/api/keunggulan"),
-          axios.get("http://localhost:5000/api/sambutan"),
+          apiClient.get("/profil"),
+          apiClient.get("/keunggulan"),
+          apiClient.get("/sambutan"),
         ]);
 
         setProfil(profilRes.data.profil);
