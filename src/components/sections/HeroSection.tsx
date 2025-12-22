@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import heroImg1 from "@/assets/hero-1.jpg";
@@ -11,11 +12,11 @@ import heroImg2 from "@/assets/hero-2.jpg";
 import heroImg3 from "@/assets/hero-3.jpg";
 
 // Fallback slides while loading or if empty
-const fallbackSlides = [
+const getFallbackSlides = (schoolName: string) => [
   {
     id: 1,
     title: "Masa Depan Digital Dimulai di Sini",
-    subtitle: "SMK Nusantara menghadirkan pendidikan vokasi berbasis teknologi masa depan dengan standar industri global.",
+    subtitle: `${schoolName} menghadirkan pendidikan vokasi berbasis teknologi masa depan dengan standar industri global.`,
     image: heroImg1,
     cta: "Mulai Jelajahi",
     cta_link: "/program",
@@ -44,6 +45,8 @@ const fallbackSlides = [
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: apiSlides, isLoading } = useQuery({
     queryKey: ['hero-slides'],
@@ -53,7 +56,7 @@ export function HeroSection() {
     }
   });
 
-  const slides = apiSlides && apiSlides.length > 0 ? apiSlides : (isLoading ? [] : fallbackSlides);
+  const slides = apiSlides && apiSlides.length > 0 ? apiSlides : (isLoading ? [] : getFallbackSlides(schoolName));
 
   const nextSlide = useCallback(() => {
     if (slides.length === 0) return;

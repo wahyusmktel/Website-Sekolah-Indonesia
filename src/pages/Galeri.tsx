@@ -8,11 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { formatDate } from "@/lib/date-utils";
 import { Loader2 } from "lucide-react";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const Galeri = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: albumListRaw, isLoading, isError } = useQuery({
     queryKey: ['albums'],
@@ -53,8 +56,8 @@ const Galeri = () => {
   return (
     <>
       <Helmet>
-        <title>Galeri - SMK Nusantara</title>
-        <meta name="description" content="Koleksi album foto kegiatan, dokumentasi, dan momen berharga SMK Nusantara." />
+        <title>Galeri - {schoolName}</title>
+        <meta name="description" content={`Koleksi album foto kegiatan, dokumentasi, dan momen berharga ${schoolName}.`} />
       </Helmet>
       <PublicLayout>
         {/* Modern Header */}
@@ -80,7 +83,7 @@ const Galeri = () => {
                   Galeri <br /> <span className="text-primary italic">Kenangan</span>
                 </h1>
                 <p className="text-white/40 text-xl font-light max-w-2xl leading-relaxed">
-                  Jelajahi setiap momen berharga dan dokumentasi transformasional dalam bentuk album foto eksklusif SMK Nusantara.
+                  Jelajahi setiap momen berharga dan dokumentasi transformasional dalam bentuk album foto eksklusif {schoolName}.
                 </p>
               </motion.div>
             </div>

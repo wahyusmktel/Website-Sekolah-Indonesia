@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function CTASection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   return (
     <section className="py-32 relative overflow-hidden" ref={ref}>
@@ -60,7 +63,7 @@ export function CTASection() {
             </h2>
 
             <p className="text-white/60 text-xl md:text-2xl font-light max-w-2xl mx-auto mb-16 leading-relaxed">
-              Bergabunglah dengan ribuan alumni sukses kami dan mulailah perjalanan karirmu di SMK Nusantara.
+              Bergabunglah dengan ribuan alumni sukses kami dan mulailah perjalanan karirmu di {schoolName}.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center">

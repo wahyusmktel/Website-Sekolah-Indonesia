@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { GraduationCap, Users, Building, Briefcase, Award, Heart, ArrowUpRight, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import apiClient from "@/lib/api-client";
 
 const iconMap: { [key: string]: React.ElementType } = {
@@ -16,6 +17,8 @@ const iconMap: { [key: string]: React.ElementType } = {
 export function KeunggulanSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: keunggulanList = [], isLoading } = useQuery({
     queryKey: ['keunggulan'],
@@ -42,7 +45,7 @@ export function KeunggulanSection() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wider uppercase mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              Why SMK Nusantara
+              Why {schoolName}
             </div>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground mb-6 leading-[1.1]">
               Investasi Terbaik untuk <br />

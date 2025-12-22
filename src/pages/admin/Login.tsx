@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 import apiClient from "@/lib/api-client";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface LoginForm {
   username: string;
@@ -19,6 +20,8 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -47,10 +50,10 @@ const AdminLogin = () => {
         <div className="bg-card rounded-2xl shadow-elevated p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-primary mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-foreground">N</span>
+              <span className="text-2xl font-bold text-primary-foreground">{schoolName.charAt(0)}</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
-            <p className="text-muted-foreground text-sm mt-2">SMK Nusantara</p>
+            <p className="text-muted-foreground text-sm mt-2">{schoolName}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

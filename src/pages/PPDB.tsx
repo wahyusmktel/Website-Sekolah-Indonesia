@@ -17,6 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import apiClient from "@/lib/api-client";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 // Icon mapping for dynamic content
 const iconMap: any = {
@@ -26,6 +27,8 @@ const iconMap: any = {
 const PPDB = () => {
   const [ppdbData, setPpdbData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,7 +68,7 @@ const PPDB = () => {
   return (
     <>
       <Helmet>
-        <title>PPDB {ppdbData.academic_year} - SMK Nusantara</title>
+        <title>PPDB {ppdbData.academic_year} - {schoolName}</title>
         <meta name="description" content={ppdbData.description} />
       </Helmet>
       <PublicLayout>
@@ -223,7 +226,7 @@ const PPDB = () => {
                 </div>
                 <div className="max-w-md">
                   <p className="text-white/40 text-lg font-light leading-relaxed">
-                    Perhatikan setiap tahapan penting untuk memastikan Anda tidak melewatkan momentum bergabung dengan SMK Nusantara.
+                    Perhatikan setiap tahapan penting untuk memastikan Anda tidak melewatkan momentum bergabung dengan {schoolName}.
                   </p>
                 </div>
               </div>

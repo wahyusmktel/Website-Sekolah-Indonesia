@@ -2,12 +2,15 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Quote, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 
 export function TestimoniSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: testimoniList = [], isLoading } = useQuery({
     queryKey: ['testimoni'],
@@ -34,7 +37,7 @@ export function TestimoniSection() {
             Apa Kata <span className="text-gradient">Alumni?</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Dengarkan pengalaman mereka yang telah sukses setelah lulus dari SMK Nusantara
+            Dengarkan pengalaman mereka yang telah sukses setelah lulus dari {schoolName}
           </p>
         </motion.div>
 

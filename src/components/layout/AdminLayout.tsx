@@ -77,7 +77,7 @@ export function AdminLayout({ children, title }: { children: ReactNode, title?: 
     }
   };
 
-  const schoolName = settings?.school_name || "Sekolah Nusantara";
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const handleLogout = () => {
     localStorage.removeItem("adminAuth");

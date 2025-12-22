@@ -11,6 +11,7 @@ import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface Member {
     id: number;
@@ -50,6 +51,8 @@ const MemberCard = ({ member, size = "md", dark = false }: { member: Member, siz
 const StrukturOrganisasi = () => {
     const [members, setMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(true);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchStruktur = async () => {
@@ -86,8 +89,8 @@ const StrukturOrganisasi = () => {
     return (
         <>
             <Helmet>
-                <title>Struktur Organisasi - SMK Nusantara</title>
-                <meta name="description" content="Struktur organisasi dan jajaran kepemimpinan SMK Nusantara yang berdedikasi tinggi." />
+                <title>Struktur Organisasi - {schoolName}</title>
+                <meta name="description" content={`Struktur organisasi dan jajaran kepemimpinan ${schoolName} yang berdedikasi tinggi.`} />
             </Helmet>
             <PublicLayout>
                 {/* Modern Hero Section */}
@@ -222,7 +225,7 @@ const StrukturOrganisasi = () => {
                                         Core <br /> <span className="text-primary tracking-widest uppercase text-base not-italic font-black">Management System</span>
                                     </h2>
                                     <p className="text-white/40 text-lg font-light leading-relaxed italic mb-8">
-                                        "Setiap struktur memiliki tanggung jawab yang terintegrasi, memastikan operasional sekolah berjalan sesuai standar keunggulan Nusantara."
+                                        "Setiap struktur memiliki tanggung jawab yang terintegrasi, memastikan operasional sekolah berjalan sesuai standar keunggulan {schoolName}."
                                     </p>
                                 </div>
                                 <div className="space-y-6">

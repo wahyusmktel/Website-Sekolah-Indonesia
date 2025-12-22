@@ -10,12 +10,15 @@ import apiClient from "@/lib/api-client";
 import { formatDate } from "@/lib/date-utils";
 import { Loader2 } from "lucide-react";
 import NotFound from "./NotFound";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function AlbumDetail() {
     const { slug } = useParams();
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     const { data: album, isLoading } = useQuery({
         queryKey: ['album-detail', slug],
@@ -60,7 +63,7 @@ export default function AlbumDetail() {
     return (
         <>
             <Helmet>
-                <title>{album.title} - Galeri SMK Nusantara</title>
+                <title>{album.title} - Galeri {schoolName}</title>
                 <meta name="description" content={album.description} />
             </Helmet>
             <PublicLayout>
@@ -198,7 +201,7 @@ export default function AlbumDetail() {
                             {/* Bottom Info */}
                             <div className="absolute bottom-8 inset-x-0 text-center px-4">
                                 <h3 className="text-white text-xl font-bold mb-2">{albumItems[selectedImageIndex].title}</h3>
-                                <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">SMK Nusantara Press Dokumentasi</p>
+                                <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{schoolName} Press Dokumentasi</p>
                             </div>
                         </motion.div>
                     )}

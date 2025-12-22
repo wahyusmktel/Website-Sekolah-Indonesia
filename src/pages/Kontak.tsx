@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface ContactForm {
   name: string;
@@ -24,6 +25,8 @@ const Kontak = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactForm>();
   const [contactInfo, setContactInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   useEffect(() => {
     const fetchContactInfo = async () => {
@@ -100,8 +103,8 @@ const Kontak = () => {
   return (
     <>
       <Helmet>
-        <title>Hubungi Kami - SMK Nusantara</title>
-        <meta name="description" content="Pusat bantuan dan layanan informasi SMK Nusantara. Hubungi kami untuk pertanyaan seputar pendaftaran dan kerjasama." />
+        <title>Hubungi Kami - {schoolName}</title>
+        <meta name="description" content={`Pusat bantuan dan layanan informasi ${schoolName}. Hubungi kami untuk pertanyaan seputar pendaftaran dan kerjasama.`} />
       </Helmet>
       <PublicLayout>
         {/* Modern Header Section */}
@@ -166,7 +169,7 @@ const Kontak = () => {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
                   <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-8">Media Sosial Kami</h4>
                   <p className="text-white/40 text-sm font-light leading-relaxed mb-8 italic">
-                    "Ikuti dokumentasi harian dan update terbaru kami melalui platform media sosial resmi SMK Nusantara."
+                    "Ikuti dokumentasi harian dan update terbaru kami melalui platform media sosial resmi {schoolName}."
                   </p>
                   <div className="flex gap-4">
                     {[

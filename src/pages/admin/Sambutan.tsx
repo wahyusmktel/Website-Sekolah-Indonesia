@@ -9,12 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const AdminSambutan = () => {
     const queryClient = useQueryClient();
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(false);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     const { data: sambutan, isLoading } = useQuery({
         queryKey: ['sambutan'],
@@ -136,7 +139,7 @@ const AdminSambutan = () => {
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="principal_role" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Jabatan</Label>
-                                        <Input id="principal_role" name="principal_role" defaultValue={sambutan?.principal_role} placeholder="Contoh: Kepala Sekolah SMK Nusantara" className="rounded-xl border-none bg-muted/50 font-bold text-primary" required />
+                                        <Input id="principal_role" name="principal_role" defaultValue={sambutan?.principal_role} placeholder={`Contoh: Kepala Sekolah ${schoolName}`} className="rounded-xl border-none bg-muted/50 font-bold text-primary" required />
                                     </div>
                                 </div>
                             </CardContent>

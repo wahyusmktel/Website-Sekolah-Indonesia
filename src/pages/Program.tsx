@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const iconMap: { [key: string]: React.ElementType } = {
   Code,
@@ -25,11 +26,14 @@ const Program = () => {
     }
   });
 
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
+
   return (
     <>
       <Helmet>
-        <title>Program Keahlian - SMK Nusantara</title>
-        <meta name="description" content="Program keahlian unggulan SMK Nusantara dengan standar industri global." />
+        <title>Program Keahlian - {schoolName}</title>
+        <meta name="description" content={`Program keahlian unggulan ${schoolName} dengan standar industri global.`} />
       </Helmet>
       <PublicLayout>
         {/* Modern Hero Section */}

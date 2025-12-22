@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface Facility {
     id: number;
@@ -29,6 +30,8 @@ const iconMap: Record<string, any> = {
 const Fasilitas = () => {
     const [facilities, setFacilities] = useState<Facility[]>([]);
     const [loading, setLoading] = useState(true);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchFacilities = async () => {
@@ -55,8 +58,8 @@ const Fasilitas = () => {
     return (
         <>
             <Helmet>
-                <title>Fasilitas Sekolah - SMK Nusantara</title>
-                <meta name="description" content="Eksplorasi fasilitas modern berstandar industri di SMK Nusantara yang mendukung ekosistem belajar digital." />
+                <title>Fasilitas Sekolah - {schoolName}</title>
+                <meta name="description" content={`Eksplorasi fasilitas modern berstandar industri di ${schoolName} yang mendukung ekosistem belajar digital.`} />
             </Helmet>
             <PublicLayout>
                 {/* Futurist Hero Section */}

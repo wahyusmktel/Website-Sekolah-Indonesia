@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface IndustryData {
     partners: any[];
@@ -25,6 +26,8 @@ const iconMap: Record<string, any> = {
 const HubunganIndustri = () => {
     const [data, setData] = useState<IndustryData | null>(null);
     const [loading, setLoading] = useState(true);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,8 +53,8 @@ const HubunganIndustri = () => {
     return (
         <>
             <Helmet>
-                <title>Hubungan Industri - SMK Nusantara</title>
-                <meta name="description" content="Jejaring korporasi dan kemitraan strategis SMK Nusantara dengan industri global dan nasional." />
+                <title>Hubungan Industri - {schoolName}</title>
+                <meta name="description" content={`Jejaring korporasi dan kemitraan strategis ${schoolName} dengan industri global dan nasional.`} />
             </Helmet>
             <PublicLayout>
                 {/* Industry Hero Section */}

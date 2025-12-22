@@ -4,6 +4,7 @@ import { Target, Eye, History, Sparkles, BookOpen, Users, Rocket, Trophy, CheckC
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface ProfilData {
   hero_title: string;
@@ -67,6 +68,8 @@ const Profil = () => {
   const [keunggulan, setKeunggulan] = useState<KeunggulanItem[]>([]);
   const [sambutan, setSambutan] = useState<SambutanData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,8 +106,8 @@ const Profil = () => {
   return (
     <>
       <Helmet>
-        <title>Profil Sekolah - SMK Nusantara</title>
-        <meta name="description" content="Profil lengkap SMK Nusantara: Visi, Misi, Sejarah, dan Sambutan Kepala Sekolah." />
+        <title>Profil Sekolah - {schoolName}</title>
+        <meta name="description" content={`Profil lengkap ${schoolName}: Visi, Misi, Sejarah, dan Sambutan Kepala Sekolah.`} />
       </Helmet>
       <PublicLayout>
         {/* Modern Hero Section */}

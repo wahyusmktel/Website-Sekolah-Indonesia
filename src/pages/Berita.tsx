@@ -9,10 +9,13 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const Berita = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: beritaList = [], isLoading } = useQuery({
     queryKey: ['berita'],
@@ -41,27 +44,27 @@ const Berita = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "Berita & Artikel SMK Nusantara",
-    "description": "Berita dan informasi terbaru seputar kegiatan, prestasi, dan pengumuman SMK Nusantara.",
+    "name": `Berita & Artikel ${schoolName}`,
+    "description": `Berita dan informasi terbaru seputar kegiatan, prestasi, dan pengumuman ${schoolName}.`,
     "url": pageUrl,
     "publisher": {
       "@type": "Organization",
-      "name": "SMK Nusantara"
+      "name": schoolName
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>Berita & Artikel | Hub Informasi Terkini SMK Nusantara</title>
-        <meta name="description" content="Eksplorasi wawasan terbaru, prestasi siswa, inovasi vokasi, dan agenda transformasional hanya di portal berita resmi SMK Nusantara." />
-        <meta name="keywords" content="SMK Nusantara, Berita Sekolah, Vokasi, Prestasi Siswa, Pendidikan Indonesia, Artikel Pendidikan" />
+        <title>Berita & Artikel | Hub Informasi Terkini {schoolName}</title>
+        <meta name="description" content={`Eksplorasi wawasan terbaru, prestasi siswa, inovasi vokasi, dan agenda transformasional hanya di portal berita resmi ${schoolName}.`} />
+        <meta name="keywords" content={`${schoolName}, Berita Sekolah, Vokasi, Prestasi Siswa, Pendidikan Indonesia, Artikel Pendidikan`} />
         <link rel="canonical" href={pageUrl} />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content={pageUrl} />
-        <meta property="og:title" content="Berita & Artikel | SMK Nusantara" />
-        <meta property="og:description" content="Portal informasi resmi SMK Nusantara. Temukan berita terbaru dan inspirasi pendidikan vokasi di sini." />
+        <meta property="og:title" content={`Berita & Artikel | ${schoolName}`} />
+        <meta property="og:description" content={`Portal informasi resmi ${schoolName}. Temukan berita terbaru dan inspirasi pendidikan vokasi di sini.`} />
 
         <script type="application/ld+json">
           {JSON.stringify(jsonLd)}
@@ -90,7 +93,7 @@ const Berita = () => {
                   Wawasan & <br /> <span className="text-primary italic">Inspirasi</span>
                 </h1>
                 <p className="text-white/40 text-xl font-light max-w-2xl leading-relaxed">
-                  Temukan kabar terbaru mengenai inovasi pendidikan, prestasi gemilang siswa, dan agenda transformasional di SMK Nusantara.
+                  Temukan kabar terbaru mengenai inovasi pendidikan, prestasi gemilang siswa, dan agenda transformasional di {schoolName}.
                 </p>
               </motion.div>
             </div>
@@ -247,7 +250,7 @@ const Berita = () => {
               <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
                 <div>
                   <h2 className="text-4xl md:text-5xl font-black text-foreground mb-6 tracking-tight">Stay Connected</h2>
-                  <p className="text-muted-foreground text-xl font-light">Dapatkan rangkuman mingguan mengenai prestasi dan inovasi terbaru SMK Nusantara langsung di inbox Anda.</p>
+                  <p className="text-muted-foreground text-xl font-light">Dapatkan rangkuman mingguan mengenai prestasi dan inovasi terbaru {schoolName} langsung di inbox Anda.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Input

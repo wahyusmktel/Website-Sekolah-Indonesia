@@ -102,14 +102,16 @@ export function Navbar() {
                 "font-black text-2xl tracking-tighter leading-none transition-colors max-w-[200px] truncate",
                 isScrolled ? "text-foreground" : "text-white"
               )}>
-                {schoolName.split(' ')[0]} <span className="text-primary italic">{schoolName.split(' ')[1]?.charAt(0)}</span>
+                {schoolName.split(' ')[0]} {schoolName.split(' ')[1] && <span className="text-primary italic">{schoolName.split(' ')[1].charAt(0)}</span>}
               </span>
-              <span className={cn(
-                "text-[10px] font-black uppercase tracking-[0.3em] ml-1 truncate max-w-[150px]",
-                isScrolled ? "text-muted-foreground" : "text-white/60"
-              )}>
-                {schoolName.split(' ').slice(1).join(' ')}
-              </span>
+              {schoolName.split(' ').length > 1 && (
+                <span className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.3em] ml-1 truncate max-w-[150px]",
+                  isScrolled ? "text-muted-foreground" : "text-white/60"
+                )}>
+                  {schoolName.split(' ').slice(1).join(' ')}
+                </span>
+              )}
             </div>
           </Link>
 

@@ -1,17 +1,32 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Twitter, Mail, Phone, MapPin, Sparkles } from "lucide-react";
-import { infoSekolah } from "@/lib/dummy-data";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useSiteSettings();
+  const { data: contactInfo } = useQuery({
+    queryKey: ['contact-info'],
+    queryFn: async () => {
+      const response = await apiClient.get('/contact-info');
+      return response.data;
+    }
+  });
 
   const schoolName = settings?.school_name || "SMK Nusantara";
   const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL?.replace('/api', '');
   const schoolLogo = settings?.school_logo ? `${baseUrl}${settings.school_logo}` : null;
+
+  const socialLinks = [
+    { Icon: Facebook, href: contactInfo?.facebook_url || "#" },
+    { Icon: Instagram, href: contactInfo?.instagram_url || "#" },
+    { Icon: Youtube, href: contactInfo?.youtube_url || "#" },
+    { Icon: Twitter, href: contactInfo?.twitter_url || "#" },
+  ];
 
   return (
     <footer className="bg-foreground text-background relative overflow-hidden">
@@ -34,11 +49,13 @@ export function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="font-black text-2xl tracking-tighter leading-none text-white max-w-[200px] truncate">
-                  {schoolName.split(' ')[0]} <span className="text-primary italic">{schoolName.split(' ')[1]?.charAt(0)}</span>
+                  {schoolName.split(' ')[0]} {schoolName.split(' ')[1] && <span className="text-primary italic">{schoolName.split(' ')[1].charAt(0)}</span>}
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 truncate max-w-[150px]">
-                  {schoolName.split(' ').slice(1).join(' ')}
-                </span>
+                {schoolName.split(' ').length > 1 && (
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 truncate max-w-[150px]">
+                    {schoolName.split(' ').slice(1).join(' ')}
+                  </span>
+                )}
               </div>
             </Link>
 
@@ -47,12 +64,7 @@ export function Footer() {
             </p>
 
             <div className="flex gap-4">
-              {[
-                { Icon: Facebook, href: infoSekolah.sosmed.facebook },
-                { Icon: Instagram, href: infoSekolah.sosmed.instagram },
-                { Icon: Youtube, href: infoSekolah.sosmed.youtube },
-                { Icon: Twitter, href: infoSekolah.sosmed.twitter },
-              ].map((social, i) => (
+              {socialLinks.map((social, i) => (
                 <motion.a
                   key={i}
                   href={social.href}
@@ -101,19 +113,19 @@ export function Footer() {
                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                     <MapPin size={18} />
                   </div>
-                  <span className="text-white/50 text-sm font-light leading-relaxed">{infoSekolah.alamat}</span>
+                  <span className="text-white/50 text-sm font-light leading-relaxed">{contactInfo?.address || "Jl. Pendidikan No. 123"}</span>
                 </li>
                 <li className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                     <Phone size={18} />
                   </div>
-                  <span className="text-white/50 text-sm font-light">{infoSekolah.telp}</span>
+                  <span className="text-white/50 text-sm font-light">{contactInfo?.phone || "(021) 12345678"}</span>
                 </li>
                 <li className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                     <Mail size={18} />
                   </div>
-                  <span className="text-white/50 text-sm font-light">{infoSekolah.email}</span>
+                  <span className="text-white/50 text-sm font-light">{contactInfo?.email || "info@sekolah.id"}</span>
                 </li>
               </ul>
             </div>

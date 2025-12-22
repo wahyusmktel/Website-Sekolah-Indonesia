@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface Guru {
     id: number;
@@ -109,6 +110,8 @@ const Guru = () => {
     const [teachers, setTeachers] = useState<Guru[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchGuru = async () => {
@@ -132,8 +135,8 @@ const Guru = () => {
     return (
         <>
             <Helmet>
-                <title>Tenaga Pendidik Profesional - SMK Nusantara</title>
-                <meta name="description" content="Kenali jajaran guru profesional dan kompeten SMK Nusantara yang siap membimbing siswa." />
+                <title>Tenaga Pendidik Profesional - {schoolName}</title>
+                <meta name="description" content={`Kenali jajaran guru profesional dan kompeten ${schoolName} yang siap membimbing siswa.`} />
             </Helmet>
             <PublicLayout>
                 {/* Hero Section */}

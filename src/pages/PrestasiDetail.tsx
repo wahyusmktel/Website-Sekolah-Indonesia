@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import NotFound from "./NotFound";
 
 const PrestasiDetail = () => {
@@ -19,6 +20,8 @@ const PrestasiDetail = () => {
     const [achievement, setAchievement] = useState<any>(null);
     const [relatedAchievements, setRelatedAchievements] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -51,7 +54,7 @@ const PrestasiDetail = () => {
     return (
         <>
             <Helmet>
-                <title>{achievement.title} - SMK Nusantara</title>
+                <title>{achievement.title} - {schoolName}</title>
                 <meta name="description" content={achievement.description} />
             </Helmet>
             <PublicLayout>
@@ -163,7 +166,7 @@ const PrestasiDetail = () => {
                                             <Sparkles className="w-10 h-10 text-primary mb-6" />
                                             <h4 className="text-xl font-black mb-4 italic uppercase tracking-tighter">Dukungan Sekolah</h4>
                                             <p className="text-muted-foreground font-light leading-relaxed">
-                                                SMK Nusantara menyediakan fasilitas laboratorium mutakhir dan bimbingan mentor industri secara khusus untuk setiap siswa yang akan bertanding di kancah nasional maupun internasional.
+                                                {schoolName} menyediakan fasilitas laboratorium mutakhir dan bimbingan mentor industri secara khusus untuk setiap siswa yang akan bertanding di kancah nasional maupun internasional.
                                             </p>
                                         </div>
                                     </div>
@@ -181,7 +184,7 @@ const PrestasiDetail = () => {
                                 <div className="p-8 rounded-[2.5rem] bg-foreground text-white shadow-glow relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                                     <h4 className="text-xl font-black mb-6 italic uppercase tracking-tighter relative z-10">Bagikan Prestasi</h4>
-                                    <p className="text-white/40 text-sm mb-8 relative z-10">Beri tahu dunia tentang pencapaian luar biasa siswa-siswi SMK Nusantara.</p>
+                                    <p className="text-white/40 text-sm mb-8 relative z-10">Beri tahu dunia tentang pencapaian luar biasa siswa-siswi {schoolName}.</p>
                                     <div className="flex gap-4 relative z-10">
                                         <Button variant="hero" size="icon" className="rounded-full w-14 h-14 shadow-none border-white/10">
                                             <Share2 className="w-5 h-5" />

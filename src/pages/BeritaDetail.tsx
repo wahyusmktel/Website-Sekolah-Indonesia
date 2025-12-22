@@ -9,9 +9,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import { useEffect } from "react";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function BeritaDetail() {
     const { slug } = useParams();
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     const { data: berita, isLoading } = useQuery({
         queryKey: ['berita', slug],
@@ -72,7 +75,7 @@ export default function BeritaDetail() {
         }],
         "publisher": {
             "@type": "Organization",
-            "name": "SMK Nusantara",
+            "name": schoolName,
             "logo": {
                 "@type": "ImageObject",
                 "url": `${window.location.origin}/logo.png`
@@ -85,16 +88,16 @@ export default function BeritaDetail() {
         <>
             <Helmet>
                 {/* Basic Meta Tags */}
-                <title>{berita.title} | Berita SMK Nusantara</title>
+                <title>{berita.title} | Berita {schoolName}</title>
                 <meta name="description" content={berita.excerpt} />
-                <meta name="keywords" content={`${berita.category}, SMK Nusantara, Berita Sekolah, Vokasi, ${berita.title.split(' ').join(', ')}`} />
+                <meta name="keywords" content={`${berita.category}, ${schoolName}, Berita Sekolah, Vokasi, ${berita.title.split(' ').join(', ')}`} />
                 <link rel="canonical" href={pageUrl} />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={pageUrl} />
                 <meta property="og:title" content={berita.title} />
-                <meta property="og:description" content={berita.excerpt} />
+                <meta property="og:description" content={`Portal informasi resmi ${schoolName}. Temukan berita terbaru dan inspirasi pendidikan vokasi di sini.`} />
                 <meta property="og:image" content={fullImageUrl} />
                 <meta property="article:published_time" content={new Date(berita.date).toISOString()} />
                 <meta property="article:author" content={berita.author || "Administrator"} />
@@ -249,7 +252,7 @@ export default function BeritaDetail() {
                                         </div>
                                     </div>
                                     <p className="text-white/60 text-sm font-light leading-relaxed mb-6">
-                                        Menyajikan berita dan informasi terkini dari jantung SMK Nusantara untuk menginspirasi dunia.
+                                        Menyajikan berita dan informasi terkini dari jantung {schoolName} untuk menginspirasi dunia.
                                     </p>
                                     <button className="w-full py-4 rounded-2xl bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary transition-all">
                                         View All News

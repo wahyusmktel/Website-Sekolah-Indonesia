@@ -13,12 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const Prestasi = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeCategory, setActiveCategory] = useState("Semua");
     const [prestasiList, setPrestasiList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { data: settings } = useSiteSettings();
+    const schoolName = settings?.school_name || "SMK Nusantara";
 
     useEffect(() => {
         const fetchPrestasi = async () => {
@@ -54,8 +57,8 @@ const Prestasi = () => {
     return (
         <>
             <Helmet>
-                <title>Prestasi Siswa - SMK Nusantara</title>
-                <meta name="description" content="Koleksi prestasi dan penghargaan yang diraih oleh siswa-siswi terbaik SMK Nusantara di tingkat kota, provinsi, hingga nasional." />
+                <title>Prestasi Siswa - {schoolName}</title>
+                <meta name="description" content={`Koleksi prestasi dan penghargaan yang diraih oleh siswa-siswi terbaik ${schoolName} di tingkat kota, provinsi, hingga nasional.`} />
             </Helmet>
             <PublicLayout>
                 {/* Modern Hero Section */}
@@ -79,7 +82,7 @@ const Prestasi = () => {
                                 <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.2em]">Wall of Excellence</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-tight italic">
-                                JEJAK <span className="text-primary text-stroke-white">JUARA</span> <br /> SMK NUSANTARA
+                                JEJAK <span className="text-primary text-stroke-white">JUARA</span> <br /> {schoolName}
                             </h1>
                             <p className="text-white/40 text-xl font-light leading-relaxed mb-12 max-w-2xl mx-auto">
                                 Dedikasi, bakat, dan semangat pantang menyerah yang membuahkan hasil membanggakan di berbagai kancah kompetisi.

@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { getImageUrl } from "@/lib/image-utils";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const AdminDashboard = () => {
   const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -17,6 +18,9 @@ const AdminDashboard = () => {
       return response.data;
     }
   });
+
+  const { data: settings } = useSiteSettings();
+  const schoolName = settings?.school_name || "SMK Nusantara";
 
   const { data: popularBerita = [] } = useQuery({
     queryKey: ['popular-berita'],
@@ -278,7 +282,7 @@ const AdminDashboard = () => {
                 Database Synced
               </Badge>
               <h2 className="text-4xl font-black mb-4 leading-tight italic">Eksplorasi <span className="text-primary not-italic">Potensi Sekolah</span> Lebih Jauh.</h2>
-              <p className="text-white/40 text-lg font-light leading-relaxed">Kelola seluruh aspek digital sekolah Nusantara dari satu tempat yang terintegrasi dan aman.</p>
+              <p className="text-white/40 text-lg font-light leading-relaxed">Kelola seluruh aspek digital {schoolName} dari satu tempat yang terintegrasi dan aman.</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
