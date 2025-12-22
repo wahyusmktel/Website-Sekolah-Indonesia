@@ -35,6 +35,10 @@ import AdminHero from "./pages/admin/Hero";
 import AdminKeunggulan from "./pages/admin/Keunggulan";
 import AdminSambutan from "./pages/admin/Sambutan";
 import AdminStatistik from "./pages/admin/Statistik";
+import AdminProfil from "./pages/admin/Profil";
+import AdminStruktur from "./pages/admin/Struktur";
+import AdminGuru from "./pages/admin/Guru";
+import AdminFasilitas from "./pages/admin/Fasilitas";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -85,6 +89,10 @@ const App = () => (
               <Route path="/admin/keunggulan" element={<AdminKeunggulan />} />
               <Route path="/admin/sambutan" element={<AdminSambutan />} />
               <Route path="/admin/statistik" element={<AdminStatistik />} />
+              <Route path="/admin/profil" element={<AdminProfil />} />
+              <Route path="/admin/struktur" element={<AdminStruktur />} />
+              <Route path="/admin/guru" element={<AdminGuru />} />
+              <Route path="/admin/fasilitas" element={<AdminFasilitas />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
