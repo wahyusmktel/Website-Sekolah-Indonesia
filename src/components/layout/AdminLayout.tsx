@@ -170,9 +170,18 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-3 right-3 w-1.5 h-1.5 bg-red-500 rounded-full ring-4 ring-white" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-xl text-slate-600 hover:bg-slate-50 h-11 w-11">
-                <User className="w-5 h-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-xl text-slate-600 hover:bg-slate-50 h-11 w-11" asChild>
+                    <Link to="/admin/profile">
+                      <User className="w-5 h-5" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Profil Admin</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="h-8 w-px bg-slate-100 mx-2" />
             <div className="text-right hidden sm:block">

@@ -44,6 +44,7 @@ import AdminPrestasi from "./pages/admin/Prestasi";
 import AdminMessages from "./pages/admin/Messages";
 import AdminContactInfo from "./pages/admin/ContactInfo";
 import AdminPPDB from "./pages/admin/PPDB";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -103,6 +104,7 @@ const App = () => (
               <Route path="/admin/prestasi" element={<AdminPrestasi />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/contact-info" element={<AdminContactInfo />} />
+              <Route path="/admin/profile" element={<AdminProfile />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

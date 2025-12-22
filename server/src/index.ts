@@ -96,6 +96,68 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// -- ADMIN PROFILE ROUTES (Must be before global middleware) --
+app.put('/api/admin/profile/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { name, username } = req.body;
+
+    try {
+        // Check if username already exists for another user
+        const [existingUser]: any = await pool.query(
+            'SELECT id FROM admins WHERE username = ? AND id != ?',
+            [username, id]
+        );
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: 'Username sudah digunakan' });
+        }
+
+        await pool.query(
+            'UPDATE admins SET name = ?, username = ? WHERE id = ?',
+            [name, username, id]
+        );
+
+        res.json({ message: 'Profil berhasil diperbarui', name, username });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating profile', error });
+    }
+});
+
+app.put('/api/admin/password/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+        // Get current admin data
+        const [rows]: any = await pool.query('SELECT * FROM admins WHERE id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Admin tidak ditemukan' });
+        }
+
+        const admin = rows[0];
+
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, admin.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Password lama tidak sesuai' });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password
+        await pool.query(
+            'UPDATE admins SET password = ? WHERE id = ?',
+            [hashedPassword, id]
+        );
+
+        res.json({ message: 'Password berhasil diubah' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating password', error });
+    }
+});
+
+
 // -- AUTHENTICATION & PROTECTION --
 // Protect all data-modifying routes and sensitive data
 app.post(/^\/api\/.*/, (req, res, next) => {
@@ -171,6 +233,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/auth/verify', authMiddleware, (req: any, res) => {
     res.json({ valid: true, user: req.user });
 });
+
 
 app.get('/api/stats', authMiddleware, async (req, res) => {
     try {
