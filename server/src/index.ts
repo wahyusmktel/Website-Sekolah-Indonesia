@@ -1480,6 +1480,44 @@ app.put('/api/ppdb-info', async (req, res) => {
 });
 
 
+// PPDB Info Routes
+// ... (omitted same lines)
+
+// -- PRIVACY POLICY ROUTES --
+app.get('/api/privacy-policy', async (req, res) => {
+    try {
+        const [rows]: any = await pool.query('SELECT * FROM privacy_policy LIMIT 1');
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.json({});
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching privacy policy', error });
+    }
+});
+
+app.put('/api/privacy-policy', authMiddleware, async (req, res) => {
+    const { title, content } = req.body;
+    try {
+        const [rows]: any = await pool.query('SELECT id FROM privacy_policy LIMIT 1');
+        if (rows.length > 0) {
+            await pool.query(
+                'UPDATE privacy_policy SET title = ?, content = ?, last_updated = NOW() WHERE id = ?',
+                [title, content, rows[0].id]
+            );
+        } else {
+            await pool.query(
+                'INSERT INTO privacy_policy (title, content, last_updated) VALUES (?, ?, NOW())',
+                [title, content]
+            );
+        }
+        res.json({ message: 'Privacy policy updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating privacy policy', error });
+    }
+});
+
 // -- SITE SETTINGS ROUTES --
 app.get('/api/settings', async (req, res) => {
     try {
@@ -1495,18 +1533,18 @@ app.get('/api/settings', async (req, res) => {
 });
 
 app.put('/api/settings', async (req, res) => {
-    const { school_name, school_logo, seo_keywords, seo_description } = req.body;
+    const { school_name, school_logo, seo_keywords, seo_description, footer_description } = req.body;
     try {
         const [rows]: any = await pool.query('SELECT id FROM site_settings LIMIT 1');
         if (rows.length > 0) {
             await pool.query(
-                'UPDATE site_settings SET school_name = ?, school_logo = ?, seo_keywords = ?, seo_description = ? WHERE id = ?',
-                [school_name, school_logo, seo_keywords, seo_description, rows[0].id]
+                'UPDATE site_settings SET school_name = ?, school_logo = ?, seo_keywords = ?, seo_description = ?, footer_description = ? WHERE id = ?',
+                [school_name, school_logo, seo_keywords, seo_description, footer_description, rows[0].id]
             );
         } else {
             await pool.query(
-                'INSERT INTO site_settings (school_name, school_logo, seo_keywords, seo_description) VALUES (?, ?, ?, ?)',
-                [school_name, school_logo, seo_keywords, seo_description]
+                'INSERT INTO site_settings (school_name, school_logo, seo_keywords, seo_description, footer_description) VALUES (?, ?, ?, ?, ?)',
+                [school_name, school_logo, seo_keywords, seo_description, footer_description]
             );
         }
         res.json({ message: 'Settings updated successfully' });

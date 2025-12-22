@@ -21,6 +21,7 @@ import PPDB from "./pages/PPDB";
 import Prestasi from "./pages/Prestasi";
 import PrestasiDetail from "./pages/PrestasiDetail";
 import Guru from "./pages/Guru";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/Login";
@@ -46,6 +47,7 @@ import AdminContactInfo from "./pages/admin/ContactInfo";
 import AdminPPDB from "./pages/admin/PPDB";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/Settings";
+import AdminPrivacyPolicy from "./pages/admin/PrivacyPolicy";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -78,6 +80,7 @@ const App = () => (
             <Route path="/ppdb" element={<PPDB />} />
             <Route path="/prestasi" element={<Prestasi />} />
             <Route path="/prestasi/:slug" element={<PrestasiDetail />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
             {/* Admin Routes */}
             <Route element={<PublicRoute />}>
@@ -107,6 +110,7 @@ const App = () => (
               <Route path="/admin/contact-info" element={<AdminContactInfo />} />
               <Route path="/admin/profile" element={<AdminProfile />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/privacy-policy" element={<AdminPrivacyPolicy />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

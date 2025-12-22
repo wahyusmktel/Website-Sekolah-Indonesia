@@ -60,7 +60,7 @@ export function Footer() {
             </Link>
 
             <p className="text-white/50 text-base font-light leading-relaxed">
-              Membangun masa depan melalui inovasi pendidikan vokasi yang relevan dengan kebutuhan industri global.
+              {settings?.footer_description || "Membangun masa depan melalui inovasi pendidikan vokasi yang relevan dengan kebutuhan industri global."}
             </p>
 
             <div className="flex gap-4">
@@ -153,7 +153,9 @@ export function Footer() {
               <Link to="/admin/login" className="text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-[0.2em]">
                 System Access
               </Link>
-              <span className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em]">Privacy Policy</span>
+              <Link to="/privacy-policy" className="text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-[0.2em]">
+                Privacy Policy
+              </Link>
             </div>
           </div>
         </div>

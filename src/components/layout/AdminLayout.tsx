@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info, FileText, Settings, Check } from "lucide-react";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info, FileText, Settings, Check, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ const menuItems = [
   { icon: Settings, label: "Pengaturan Web", href: "/admin/settings" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
+  { icon: ShieldCheck, label: "Kebijakan Privasi", href: "/admin/privacy-policy" },
 ];
 
 export function AdminLayout({ children, title }: { children: ReactNode, title?: string }) {

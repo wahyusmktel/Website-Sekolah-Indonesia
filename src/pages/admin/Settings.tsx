@@ -85,6 +85,7 @@ const AdminSettings = () => {
                 : null,
             seo_keywords: formData.get('seo_keywords'),
             seo_description: formData.get('seo_description'),
+            footer_description: formData.get('footer_description'),
         };
         mutation.mutate(data);
     };
@@ -148,6 +149,22 @@ const AdminSettings = () => {
                                     </div>
                                     <p className="text-[10px] text-muted-foreground italic px-2">
                                         * Nama ini akan muncul di Judul Tab Browser, Header, dan Footer website.
+                                    </p>
+                                </div>
+
+                                {/* Footer Description */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] ml-2 text-muted-foreground/60">Footer Description</Label>
+                                        <Textarea
+                                            name="footer_description"
+                                            defaultValue={settings?.footer_description}
+                                            placeholder="Membangun masa depan melalui inovasi pendidikan vokasi..."
+                                            className="min-h-[100px] rounded-2xl bg-foreground/5 border-none px-6 py-4 font-medium text-slate-800 focus:ring-2 focus:ring-primary/20 transition-all resize-none shadow-sm"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground italic px-2">
+                                        * Kalimat singkat yang muncul di bagian bawah website (Footer).
                                     </p>
                                 </div>
 
