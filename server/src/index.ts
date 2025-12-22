@@ -883,6 +883,7 @@ app.delete('/api/guru/:id', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 // Fasilitas Routes
 app.get('/api/fasilitas', async (req, res) => {
     try {
@@ -930,6 +931,8 @@ app.delete('/api/fasilitas/:id', async (req, res) => {
     }
 });
 
+=======
+>>>>>>> dc354e15353c94e10daa6140bd4ff245c982b8b2
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
