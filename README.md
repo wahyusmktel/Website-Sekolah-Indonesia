@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# Website Resmi SMK Telkom Lampung 🚀
 
-## Project info
+Sistem informasi profil sekolah modern berbasis web untuk **SMK Telkom Lampung**, dirancang untuk memberikan pengalaman digital yang interaktif, informatif, dan profesional bagi calon siswa, orang tua, serta masyarakat luas.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ✨ Fitur Utama
+- **Dashboard Admin**: Pengelolaan konten berita, agenda, galeri, dan fasilitas sekolah secara real-time.
+- **Manajemen PPDB**: Sistem pendaftaran siswa baru yang terintegrasi dan dinamis.
+- **Profil Sekolah**: Informasi lengkap mengenai visi, misi, sejarah, dan struktur organisasi.
+- **Hubungan Industri**: Informasi kemitraan strategis dengan berbagai perusahaan.
+- **Prestasi & Galeri**: Dokumentasi kegiatan dan raihan prestasi civitas akademika.
+- **Cookie Consent**: Kepatuhan terhadap regulasi privasi data global (PDP).
 
-## How can I edit this code?
+## 🛠️ Teknologi yang Digunakan
+Website ini dibangun dengan tumpukan teknologi modern untuk memastikan kecepatan, keamanan, dan skalabilitas:
+- **Frontend**: [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/), [Framer Motion](https://www.framer.com/motion/)
+- **Backend**: [Node.js](https://nodejs.org/), [Express](https://expressjs.com/)
+- **Database**: [MySQL](https://www.mysql.com/)
+- **ORM**: [Sequelize](https://sequelize.org/)
 
-There are several ways of editing your application.
+## 🧑‍💻 Tim Pengembang
+Dikembangkan dan dikelola dengan penuh dedikasi oleh:
+**Tim IT SMK Telkom Lampung**
 
-**Use Lovable**
+## 🚀 Cara Menjalankan Project
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Prerequisites
+- Node.js (v16+)
+- MySQL Database
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+### Instalasi & Menjalankan Frontend
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Run development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Menjalankan Backend
+```sh
+# Navigate to server directory
+cd server
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# Install dependencies
+npm install
 
-**Use GitHub Codespaces**
+# Setup environment variables (.env)
+# DB_HOST, DB_USER, DB_PASS, DB_NAME, JWT_SECRET
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Run development server
+npm run dev
+```
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+© 2026 SMK Telkom Lampung. Managed by IT Department.
