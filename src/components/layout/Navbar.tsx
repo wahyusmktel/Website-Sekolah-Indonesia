@@ -82,11 +82,11 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-4 group">
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-elevated overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-elevated overflow-hidden">
                 {schoolLogo ? (
                   <img src={schoolLogo} alt={schoolName} className="w-full h-full object-contain p-2" />
                 ) : (
-                  <span className="text-background font-black text-2xl">{schoolName.charAt(0)}</span>
+                  <span className="text-foreground font-black text-2xl">{schoolName.charAt(0)}</span>
                 )}
               </div>
               <motion.div
