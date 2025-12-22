@@ -53,6 +53,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 
 import NotFound from "./pages/NotFound";
+import CookieConsent from "./components/ui/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <CookieConsent />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
