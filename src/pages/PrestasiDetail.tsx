@@ -9,18 +9,44 @@ import {
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { prestasiList } from "@/lib/dummy-data";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getImageUrl } from "@/lib/image-utils";
 import NotFound from "./NotFound";
 
 const PrestasiDetail = () => {
     const { slug } = useParams();
-    const achievement = prestasiList.find(p => p.slug === slug);
+    const [achievement, setAchievement] = useState<any>(null);
+    const [relatedAchievements, setRelatedAchievements] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDetail = async () => {
+            try {
+                const { data } = await axios.get(`http://localhost:5000/api/prestasi/${slug}`);
+                setAchievement(data);
+
+                // Fetch related (all for now then filter)
+                const { data: all } = await axios.get("http://localhost:5000/api/prestasi");
+                setRelatedAchievements(all.filter((p: any) => p.category === data.category && p.id !== data.id).slice(0, 2));
+            } catch (error) {
+                console.error("Error fetching achievement detail:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDetail();
+    }, [slug]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-foreground">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+            </div>
+        );
+    }
 
     if (!achievement) return <NotFound />;
-
-    const relatedAchievements = prestasiList
-        .filter(p => p.category === achievement.category && p.id !== achievement.id)
-        .slice(0, 2);
 
     return (
         <>
@@ -33,7 +59,7 @@ const PrestasiDetail = () => {
                 <section className="relative pt-32 pb-60 overflow-hidden bg-foreground">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={achievement.image}
+                            src={getImageUrl(achievement.image)}
                             alt={achievement.title}
                             className="w-full h-full object-cover opacity-30 scale-110 blur-sm"
                         />
@@ -110,7 +136,7 @@ const PrestasiDetail = () => {
                             >
                                 <div className="rounded-[3.5rem] overflow-hidden shadow-elevated mb-16 relative group">
                                     <img
-                                        src={achievement.image}
+                                        src={getImageUrl(achievement.image)}
                                         alt={achievement.title}
                                         className="w-full object-cover aspect-video group-hover:scale-105 transition-transform duration-[3s]"
                                     />
@@ -121,7 +147,7 @@ const PrestasiDetail = () => {
                                     <div className="flex gap-6 mb-12">
                                         <Quote className="w-16 h-16 text-primary/20 shrink-0" />
                                         <p className="text-2xl md:text-3xl font-light text-foreground leading-relaxed italic">
-                                            {achievement.longDescription}
+                                            {achievement.long_description}
                                         </p>
                                     </div>
 
@@ -174,7 +200,7 @@ const PrestasiDetail = () => {
                                             <Link key={rel.id} to={`/prestasi/${rel.slug}`} className="group block">
                                                 <div className="flex gap-5 items-center p-4 rounded-3xl bg-white dark:bg-foreground/5 border border-border group-hover:border-primary/50 transition-all">
                                                     <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0">
-                                                        <img src={rel.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={rel.title} />
+                                                        <img src={getImageUrl(rel.image)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={rel.title} />
                                                     </div>
                                                     <div>
                                                         <h5 className="font-black text-sm tracking-tight mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors italic">{rel.title}</h5>

@@ -929,6 +929,286 @@ app.delete('/api/fasilitas/:id', async (req, res) => {
         res.status(500).json({ message: 'Error deleting fasilitas item', error });
     }
 });
+
+// Industry Partners Routes
+app.get('/api/industry-partners', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM industry_partners ORDER BY order_priority ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching industry partners', error });
+    }
+});
+
+app.post('/api/industry-partners', async (req, res) => {
+    const { name, logo, category, order_priority } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO industry_partners (name, logo, category, order_priority) VALUES (?, ?, ?, ?)',
+            [name, logo, category, order_priority || 0]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating industry partner', error });
+    }
+});
+
+app.put('/api/industry-partners/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, logo, category, order_priority } = req.body;
+    try {
+        await pool.query(
+            'UPDATE industry_partners SET name = ?, logo = ?, category = ?, order_priority = ? WHERE id = ?',
+            [name, logo, category, order_priority, id]
+        );
+        res.json({ message: 'Industry partner updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating industry partner', error });
+    }
+});
+
+app.delete('/api/industry-partners/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM industry_partners WHERE id = ?', [id]);
+        res.json({ message: 'Industry partner deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting industry partner', error });
+    }
+});
+
+// Industry Programs Routes
+app.get('/api/industry-programs', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM industry_programs ORDER BY order_priority ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching industry programs', error });
+    }
+});
+
+app.post('/api/industry-programs', async (req, res) => {
+    const { title, description, icon, order_priority } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO industry_programs (title, description, icon, order_priority) VALUES (?, ?, ?, ?)',
+            [title, description, icon, order_priority || 0]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating industry program', error });
+    }
+});
+
+app.put('/api/industry-programs/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, description, icon, order_priority } = req.body;
+    try {
+        await pool.query(
+            'UPDATE industry_programs SET title = ?, description = ?, icon = ?, order_priority = ? WHERE id = ?',
+            [title, description, icon, order_priority, id]
+        );
+        res.json({ message: 'Industry program updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating industry program', error });
+    }
+});
+
+app.delete('/api/industry-programs/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM industry_programs WHERE id = ?', [id]);
+        res.json({ message: 'Industry program deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting industry program', error });
+    }
+});
+
+// Industry Stats Routes
+app.get('/api/industry-stats', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM industry_stats ORDER BY order_priority ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching industry stats', error });
+    }
+});
+
+app.post('/api/industry-stats', async (req, res) => {
+    const { label, value, order_priority } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO industry_stats (label, value, order_priority) VALUES (?, ?, ?)',
+            [label, value, order_priority || 0]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating industry stat', error });
+    }
+});
+
+app.put('/api/industry-stats/:id', async (req, res) => {
+    const { id } = req.params;
+    const { label, value, order_priority } = req.body;
+    try {
+        await pool.query(
+            'UPDATE industry_stats SET label = ?, value = ?, order_priority = ? WHERE id = ?',
+            [label, value, order_priority, id]
+        );
+        res.json({ message: 'Industry stat updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating industry stat', error });
+    }
+});
+
+app.delete('/api/industry-stats/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM industry_stats WHERE id = ?', [id]);
+        res.json({ message: 'Industry stat deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting industry stat', error });
+    }
+});
+
+// Combined Public Route
+app.get('/api/hubungan-industri', async (req, res) => {
+    try {
+        const [partners] = await pool.query('SELECT * FROM industry_partners ORDER BY order_priority ASC');
+        const [programs] = await pool.query('SELECT * FROM industry_programs ORDER BY order_priority ASC');
+        const [stats] = await pool.query('SELECT * FROM industry_stats ORDER BY order_priority ASC');
+        res.json({ partners, programs, stats });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching hubungan industri data', error });
+    }
+});
+
+// Prestasi Routes
+app.get('/api/prestasi', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM prestasi ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching prestasi', error });
+    }
+});
+
+app.get('/api/prestasi/:slug', async (req, res) => {
+    const { slug } = req.params;
+    try {
+        const [rows] = await pool.query('SELECT * FROM prestasi WHERE slug = ?', [slug]);
+        if ((rows as any[]).length === 0) return res.status(404).json({ message: 'Prestasi not found' });
+        res.json((rows as any[])[0]);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching prestasi detail', error });
+    }
+});
+
+app.post('/api/prestasi', async (req, res) => {
+    const { title, slug, category, winner, date, level, image, description, long_description } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO prestasi (title, slug, category, winner, date, level, image, description, long_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, slug, category, winner, date, level, image, description, long_description]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating prestasi', error });
+    }
+});
+
+app.put('/api/prestasi/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, slug, category, winner, date, level, image, description, long_description } = req.body;
+    try {
+        await pool.query(
+            'UPDATE prestasi SET title = ?, slug = ?, category = ?, winner = ?, date = ?, level = ?, image = ?, description = ?, long_description = ? WHERE id = ?',
+            [title, slug, category, winner, date, level, image, description, long_description, id]
+        );
+        res.json({ message: 'Prestasi updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating prestasi', error });
+    }
+});
+
+app.delete('/api/prestasi/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM prestasi WHERE id = ?', [id]);
+        res.json({ message: 'Prestasi deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting prestasi', error });
+    }
+});
+
+// Messages Routes
+app.get('/api/messages', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM messages ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching messages', error });
+    }
+});
+
+app.post('/api/messages', async (req, res) => {
+    const { name, email, subject, message } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+            [name, email, subject, message]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error sending message', error });
+    }
+});
+
+app.patch('/api/messages/:id/read', async (req, res) => {
+    const { id } = req.params;
+    const { is_read } = req.body;
+    try {
+        await pool.query('UPDATE messages SET is_read = ? WHERE id = ?', [is_read, id]);
+        res.json({ message: 'Message status updated' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating message status', error });
+    }
+});
+
+app.delete('/api/messages/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM messages WHERE id = ?', [id]);
+        res.json({ message: 'Message deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting message', error });
+    }
+});
+
+// Contact Info Routes
+app.get('/api/contact-info', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM contact_info LIMIT 1');
+        res.json((rows as any[])[0] || {});
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching contact info', error });
+    }
+});
+
+app.put('/api/contact-info/:id', async (req, res) => {
+    const { id } = req.params;
+    const { school_name, address, phone, email, website, maps_url, facebook_url, instagram_url, youtube_url, twitter_url } = req.body;
+    try {
+        await pool.query(
+            'UPDATE contact_info SET school_name = ?, address = ?, phone = ?, email = ?, website = ?, maps_url = ?, facebook_url = ?, instagram_url = ?, youtube_url = ?, twitter_url = ? WHERE id = ?',
+            [school_name, address, phone, email, website, maps_url, facebook_url, instagram_url, youtube_url, twitter_url, id]
+        );
+        res.json({ message: 'Contact info updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating contact info', error });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

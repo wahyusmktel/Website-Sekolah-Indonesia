@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { infoSekolah } from "@/lib/dummy-data";
 import { useToast } from "@/hooks/use-toast";
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 interface ContactForm {
   name: string;
   email: string;
@@ -19,36 +22,68 @@ interface ContactForm {
 const Kontak = () => {
   const { toast } = useToast();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactForm>();
+  const [contactInfo, setContactInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const onSubmit = (data: ContactForm) => {
-    console.log(data);
-    toast({
-      title: "🚀 Pesan Berhasil Terkirim",
-      description: "Terima kasih! Tim administrasi kami akan segera menghubungi Anda kembali.",
-      className: "bg-foreground text-background border-none rounded-2xl font-bold",
-    });
-    reset();
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/contact-info");
+        setContactInfo(data);
+      } catch (error) {
+        console.error("Error fetching contact info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContactInfo();
+  }, []);
+
+  const onSubmit = async (data: ContactForm) => {
+    try {
+      await axios.post("http://localhost:5000/api/messages", data);
+      toast({
+        title: "🚀 Pesan Berhasil Terkirim",
+        description: "Terima kasih! Tim administrasi kami akan segera menghubungi Anda kembali.",
+        className: "bg-foreground text-background border-none rounded-2xl font-bold",
+      });
+      reset();
+    } catch (error) {
+      toast({
+        title: "❌ Gagal Mengirim Pesan",
+        description: "Terjadi kesalahan saat mengirim pesan. Silakan coba lagi nanti.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading || !contactInfo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-foreground">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const contactOptions = [
     {
       icon: MapPin,
       title: "Lokasi Kampus",
-      content: infoSekolah.alamat,
+      content: contactInfo.address,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
       icon: Phone,
       title: "Layanan Telepon",
-      content: infoSekolah.telp,
+      content: contactInfo.phone,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
     },
     {
       icon: Mail,
       title: "Email Respon",
-      content: infoSekolah.email,
+      content: contactInfo.email,
       color: "text-primary",
       bg: "bg-primary/10",
     },
@@ -135,10 +170,10 @@ const Kontak = () => {
                   </p>
                   <div className="flex gap-4">
                     {[
-                      { icon: Facebook, href: infoSekolah.sosmed.facebook },
-                      { icon: Instagram, href: infoSekolah.sosmed.instagram },
-                      { icon: Youtube, href: infoSekolah.sosmed.youtube },
-                      { icon: Twitter, href: infoSekolah.sosmed.twitter },
+                      { icon: Facebook, href: contactInfo.facebook_url },
+                      { icon: Instagram, href: contactInfo.instagram_url },
+                      { icon: Youtube, href: contactInfo.youtube_url },
+                      { icon: Twitter, href: contactInfo.twitter_url },
                     ].map((social, i) => (
                       <a
                         key={i}
@@ -259,10 +294,10 @@ const Kontak = () => {
                     <h4 className="font-black uppercase tracking-widest text-xs">Official Location</h4>
                   </div>
                   <p className="text-sm font-light text-muted-foreground mb-4 leading-relaxed">
-                    {infoSekolah.alamat}
+                    {contactInfo.address}
                   </p>
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(infoSekolah.alamat)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactInfo.address)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline underline-offset-8"
@@ -272,15 +307,15 @@ const Kontak = () => {
                 </div>
               </div>
 
-              {/* Map Placeholder Content */}
-              <div className="w-full h-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center relative">
-                <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/107.6098, -6.9175,12,0/1200x600?access_token=YOUR_MAPBOX_TOKEN')] bg-cover opacity-50 contrast-125" />
-                <div className="relative text-center">
-                  <div className="w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 border border-white/20 flex items-center justify-center mb-6 backdrop-blur-md animate-bounce">
-                    <MapPin className="w-10 h-10 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-black uppercase tracking-[0.3em] text-foreground opacity-20">Interactive Map Interface</h3>
-                </div>
+              {/* Map Content */}
+              <div className="w-full h-full bg-slate-200 dark:bg-slate-900 relative">
+                <iframe
+                  src={contactInfo.maps_url}
+                  className="w-full h-full border-none grayscale contrast-125 opacity-80"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
               </div>
             </motion.div>
           </div>

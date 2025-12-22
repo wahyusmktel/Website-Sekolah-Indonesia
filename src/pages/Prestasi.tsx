@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -11,11 +11,28 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { prestasiList } from "@/lib/dummy-data";
+import axios from "axios";
+import { getImageUrl } from "@/lib/image-utils";
 
 const Prestasi = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeCategory, setActiveCategory] = useState("Semua");
+    const [prestasiList, setPrestasiList] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPrestasi = async () => {
+            try {
+                const { data } = await axios.get("http://localhost:5000/api/prestasi");
+                setPrestasiList(data);
+            } catch (error) {
+                console.error("Error fetching prestasi:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPrestasi();
+    }, []);
 
     const categories = ["Semua", ...new Set(prestasiList.map(item => item.category))];
 
@@ -25,6 +42,14 @@ const Prestasi = () => {
         const matchesCategory = activeCategory === "Semua" || item.category === activeCategory;
         return matchesSearch && matchesCategory;
     });
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-foreground">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -130,7 +155,7 @@ const Prestasi = () => {
                                             {/* Image Preview */}
                                             <div className="aspect-[16/10] overflow-hidden relative">
                                                 <img
-                                                    src={item.image}
+                                                    src={getImageUrl(item.image)}
                                                     alt={item.title}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />

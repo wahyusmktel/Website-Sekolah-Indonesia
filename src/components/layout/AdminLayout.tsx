@@ -1,9 +1,16 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users } from "lucide-react";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
@@ -17,7 +24,11 @@ const menuItems = [
   { icon: Trophy, label: "Statistik", href: "/admin/statistik" },
   { icon: Calendar, label: "Agenda", href: "/admin/agenda" },
   { icon: GraduationCap, label: "Program", href: "/admin/program" },
-  { icon: LayoutDashboard, label: "Fasilitas Sekolah", href: "/admin/fasilitas" },
+  { icon: Monitor, label: "Fasilitas Sekolah", href: "/admin/fasilitas" },
+  { icon: Handshake, label: "Hubungan Industri", href: "/admin/hubungan-industri" },
+  { icon: Trophy, label: "Prestasi Siswa", href: "/admin/prestasi" },
+  { icon: Mail, label: "Pesan Masuk", href: "/admin/messages" },
+  { icon: Info, label: "Info Kontak", href: "/admin/contact-info" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
 ];
@@ -53,7 +64,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <div className="px-5 py-6">
+        <ScrollArea className="flex-1 h-[calc(100vh-200px)] px-5">
           <div className={cn(
             "mb-6 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2",
             !sidebarOpen && "justify-center px-0"
@@ -64,37 +75,41 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               "MENU"
             )}
           </div>
-          <nav className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    "group flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
-                    isActive
-                      ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute left-0 top-0 w-1 h-full bg-primary"
-                    />
-                  )}
-                  <Icon className={cn(
-                    "w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110",
-                    isActive ? "text-primary-light" : "text-slate-400 group-hover:text-primary"
-                  )} />
-                  {sidebarOpen && <span className="font-bold text-sm">{item.label}</span>}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+          <TooltipProvider delayDuration={0}>
+            <nav className="space-y-1.5 pb-20">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.href;
+                return (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={item.href}
+                        className={cn(
+                          "group flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden",
+                          isActive
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "text-slate-500 hover:bg-primary/5 hover:text-primary"
+                        )}
+                      >
+                        <Icon className={cn(
+                          "w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110",
+                          isActive ? "text-white" : "text-slate-400 group-hover:text-primary"
+                        )} />
+                        {sidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
+                      </Link>
+                    </TooltipTrigger>
+                    {!sidebarOpen && (
+                      <TooltipContent side="right" className="bg-primary text-white border-none rounded-xl font-bold shadow-xl">
+                        {item.label}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                );
+              })}
+            </nav>
+          </TooltipProvider>
+        </ScrollArea>
 
         <div className="absolute bottom-6 left-5 right-5 space-y-4">
           {sidebarOpen && (

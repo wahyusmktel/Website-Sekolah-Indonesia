@@ -6,15 +6,47 @@ import {
     ArrowUpRight, Users2, Rocket
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { hubunganIndustri } from "@/lib/dummy-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getImageUrl } from "@/lib/image-utils";
+
+interface IndustryData {
+    partners: any[];
+    programs: any[];
+    stats: any[];
+}
 
 const iconMap: Record<string, any> = {
     Building2, Award, Briefcase, Target
 };
 
 const HubunganIndustri = () => {
+    const [data, setData] = useState<IndustryData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/hubungan-industri");
+                setData(response.data);
+            } catch (error) {
+                console.error("Error fetching hubungan industri data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    if (loading || !data) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-foreground">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+            </div>
+        );
+    }
     return (
         <>
             <Helmet>
@@ -71,7 +103,7 @@ const HubunganIndustri = () => {
                 <section className="relative z-20 -mt-20">
                     <div className="container mx-auto px-4">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                            {hubunganIndustri.stats.map((stat, i) => (
+                            {data.stats.map((stat, i) => (
                                 <motion.div
                                     key={i}
                                     initial={{ opacity: 0, scale: 0.9 }}
@@ -112,7 +144,7 @@ const HubunganIndustri = () => {
                             </div>
 
                             <div className="lg:w-1/2 grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {hubunganIndustri.programs.map((program, i) => {
+                                {data.programs.map((program, i) => {
                                     const Icon = iconMap[program.icon] || Rocket;
                                     return (
                                         <motion.div
@@ -149,14 +181,14 @@ const HubunganIndustri = () => {
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-8 lg:gap-12 px-4 max-w-6xl mx-auto">
-                        {hubunganIndustri.partners.map((partner, i) => (
+                        {data.partners.map((partner, i) => (
                             <motion.div
                                 key={i}
                                 whileHover={{ scale: 1.05, filter: "grayscale(0%)" }}
                                 className="w-32 h-32 md:w-40 md:h-40 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center grayscale opacity-50 hover:opacity-100 hover:bg-white/10 transition-all cursor-crosshair"
                             >
                                 <img
-                                    src={partner.logo}
+                                    src={getImageUrl(partner.logo)}
                                     alt={partner.name}
                                     className="w-full h-auto max-h-[60%] object-contain"
                                 />
