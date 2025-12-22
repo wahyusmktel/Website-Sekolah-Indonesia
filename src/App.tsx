@@ -54,6 +54,12 @@ import PublicRoute from "./components/auth/PublicRoute";
 
 import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/ui/CookieConsent";
+import { useVisitorTracker } from "./hooks/use-visitor-tracker";
+
+const Tracker = () => {
+  useVisitorTracker();
+  return null;
+};
 
 const queryClient = new QueryClient();
 
@@ -64,6 +70,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Tracker />
           <CookieConsent />
           <Routes>
             {/* Public Routes */}

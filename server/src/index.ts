@@ -1553,6 +1553,76 @@ app.put('/api/settings', async (req, res) => {
     }
 });
 
+// -- PUBLIC ANALYTICS TRACKING --
+app.post('/api/analytics/track', async (req, res) => {
+    const { sessionId, type, path } = req.body;
+    try {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+        const referrer = req.headers['referer'] || req.headers['referrer'];
+
+        await pool.query(
+            'INSERT INTO visitor_logs (session_id, log_type, ip_address, user_agent, path, referrer) VALUES (?, ?, ?, ?, ?, ?)',
+            [sessionId, type || 'page_view', ip || 'unknown', userAgent || null, path || '/', referrer || null]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        // Silently fail to not interrupt user experience
+        res.status(200).json({ success: false });
+    }
+});
+
+// -- VISITOR ANALYTICS ROUTES --
+app.get('/api/admin/visitor-stats', authMiddleware, async (req, res) => {
+    try {
+        // 1. Summary Counts (Focus on session_start for high-level visitors)
+        const [totalVisitors]: any = await pool.query("SELECT COUNT(*) as count FROM visitor_logs WHERE log_type = 'session_start'");
+        const [todayVisitors]: any = await pool.query("SELECT COUNT(*) as count FROM visitor_logs WHERE log_type = 'session_start' AND DATE(created_at) = CURDATE()");
+        const [totalPageViews]: any = await pool.query("SELECT COUNT(*) as count FROM visitor_logs WHERE log_type = 'page_view'");
+
+        // 2. Daily Timeline (Last 14 days of session_starts)
+        const [dailyTimeline]: any = await pool.query(`
+            SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count 
+            FROM visitor_logs 
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+            AND log_type = 'session_start'
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        `);
+
+        // 3. Most Popular Pages (Based on page_views)
+        const [topPages]: any = await pool.query(`
+            SELECT path, COUNT(*) as count 
+            FROM visitor_logs 
+            WHERE log_type = 'page_view'
+            GROUP BY path 
+            ORDER BY count DESC 
+            LIMIT 8
+        `);
+
+        // 4. Latest Sessions Detail
+        const [latestVisits]: any = await pool.query(`
+            SELECT * FROM visitor_logs 
+            WHERE log_type = 'session_start'
+            ORDER BY created_at DESC 
+            LIMIT 15
+        `);
+
+        res.json({
+            summary: {
+                total: totalVisitors[0].count,
+                today: todayVisitors[0].count,
+                totalViews: totalPageViews[0].count
+            },
+            dailyTimeline,
+            topPages,
+            latestVisits
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching analytics', error });
+    }
+});
+
 // -- GLOBAL ERROR HANDLER --
 app.use((err: any, req: any, res: any, next: any) => {
     console.error('Unhandled Error:', err);

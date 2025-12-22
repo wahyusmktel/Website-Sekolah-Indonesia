@@ -11,6 +11,14 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const AdminDashboard = () => {
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
+    queryKey: ['visitor-stats'],
+    queryFn: async () => {
+      const response = await apiClient.get('/admin/visitor-stats');
+      return response.data;
+    }
+  });
+
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
     queryFn: async () => {
@@ -30,32 +38,36 @@ const AdminDashboard = () => {
     }
   });
 
-  // Mock data for the chart
-  const chartData = [
-    { name: 'Mon', views: 400 },
-    { name: 'Tue', views: 700 },
-    { name: 'Wed', views: 1200 },
-    { name: 'Thu', views: 900 },
-    { name: 'Fri', views: 1500 },
-    { name: 'Sat', views: 2100 },
-    { name: 'Sun', views: 1800 },
-  ];
+  // Process chart data from analytics
+  const chartData = analyticsData?.dailyTimeline?.map((item: any) => ({
+    name: new Date(item.date).toLocaleDateString('id-ID', { weekday: 'short' }),
+    views: item.count
+  })) || [];
 
   const stats = [
     {
-      icon: Users,
-      label: "Total Siswa",
-      value: statsData?.siswa || 0,
-      trend: "Data Aktif",
+      icon: Eye,
+      label: "Visitors Today",
+      value: analyticsData?.summary?.today || 0,
+      trend: "Realtime",
       isUp: true,
       gradient: "from-blue-500/20 to-blue-600/5",
       iconColor: "text-blue-500"
     },
     {
-      icon: Trophy,
-      label: "Prestasi Siswa",
-      value: statsData?.prestasi || 0,
-      trend: "Total Record",
+      icon: Users,
+      label: "Total Visitors",
+      value: analyticsData?.summary?.total || 0,
+      trend: "All Time",
+      isUp: true,
+      gradient: "from-emerald-500/20 to-emerald-600/5",
+      iconColor: "text-emerald-500"
+    },
+    {
+      icon: TrendingUp,
+      label: "Page Views",
+      value: analyticsData?.summary?.totalViews || 0,
+      trend: "Total Interactions",
       isUp: true,
       gradient: "from-amber-500/20 to-amber-600/5",
       iconColor: "text-amber-500"
@@ -65,7 +77,7 @@ const AdminDashboard = () => {
       label: "Pesan Baru",
       value: statsData?.messages || 0,
       trend: "Perlu Cek",
-      isUp: statsData?.messages > 0,
+      isUp: (statsData?.messages || 0) > 0,
       gradient: "from-rose-500/20 to-rose-600/5",
       iconColor: "text-rose-500"
     },
@@ -126,7 +138,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -147,7 +159,7 @@ const AdminDashboard = () => {
                       <div className="space-y-1">
                         <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">{stat.label}</p>
                         <h3 className="text-3xl font-black text-foreground">
-                          {statsLoading ? "..." : stat.value.toLocaleString()}
+                          {(analyticsLoading || statsLoading) ? "..." : stat.value.toLocaleString()}
                         </h3>
                       </div>
                     </div>
@@ -158,116 +170,157 @@ const AdminDashboard = () => {
           })}
         </div>
 
-        {/* Main Charts & Popular Content */}
+        {/* Main Traffic Chart */}
+        <motion.div variants={itemVariants}>
+          <Card className="border-none bg-card shadow-soft rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="p-8 pb-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-black italic flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary" /> Traffic Analysis
+                  </CardTitle>
+                  <CardDescription>Statistik interaksi situs dalam 14 hari terakhir</CardDescription>
+                </div>
+                <Badge variant="secondary" className="rounded-xl px-4 py-2 font-bold bg-muted/50 border-none">
+                  Realtime Stats
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 700 }}
+                      dy={10}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 700 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        borderRadius: '20px',
+                        border: 'none',
+                        boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1)',
+                        fontWeight: 800
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="views"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={4}
+                      fillOpacity={1}
+                      fill="url(#colorViews)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Visitor Activity & Popular Pages */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Chart Area */}
+          {/* Latest Visitors */}
           <motion.div className="lg:col-span-2" variants={itemVariants}>
-            <Card className="border-none bg-card shadow-soft rounded-[2.5rem] overflow-hidden h-full">
-              <CardHeader className="p-8 pb-0">
+            <Card className="border-none bg-card shadow-soft rounded-[2.5rem] overflow-hidden">
+              <CardHeader className="p-8">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl font-black italic flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-primary" /> Traffic Analysis
+                      <Clock className="w-5 h-5 text-primary" /> Latest Activity
                     </CardTitle>
-                    <CardDescription>Statistik interaksi situs dalam 7 hari terakhir</CardDescription>
+                    <CardDescription>Log pengunjung terbaru secara realtime</CardDescription>
                   </div>
-                  <Badge variant="secondary" className="rounded-xl px-4 py-2 font-bold bg-muted/50 border-none">
-                    Realtime Update
+                  <Badge variant="outline" className="rounded-xl border-primary/20 text-primary font-bold">
+                    IP TRACKING ACTIVE
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="p-8">
-                <div className="h-[350px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 700 }}
-                        dy={10}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 700 }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          borderRadius: '20px',
-                          border: 'none',
-                          boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1)',
-                          fontWeight: 800
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="views"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={4}
-                        fillOpacity={1}
-                        fill="url(#colorViews)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+              <CardContent className="px-8 pb-8 pt-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground border-b border-border/50">
+                        <th className="pb-4 pt-2">IP Address</th>
+                        <th className="pb-4 pt-2">Target Path</th>
+                        <th className="pb-4 pt-2">Time</th>
+                        <th className="pb-4 pt-2">Device</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData?.latestVisits?.length > 0 ? analyticsData.latestVisits.map((visit: any) => (
+                        <tr key={visit.id} className="border-b border-border/30 last:border-0 group hover:bg-muted/30 transition-colors">
+                          <td className="py-4">
+                            <span className="font-mono text-xs font-bold bg-muted px-2 py-1 rounded-md text-slate-600">
+                              {visit.ip_address.replace('::ffff:', '')}
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <span className="text-xs font-medium text-slate-800 italic underline decoration-primary/20">{visit.path}</span>
+                          </td>
+                          <td className="py-4 text-xs text-muted-foreground">
+                            {new Date(visit.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center gap-1.5 overflow-hidden max-w-[150px]">
+                              <span className="text-[9px] font-medium text-muted-foreground truncate" title={visit.user_agent}>
+                                {visit.user_agent || 'Unknown Device'}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={4} className="py-10 text-center text-muted-foreground italic">Fetching data...</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Popular Berita */}
+          {/* Popular Pages */}
           <motion.div variants={itemVariants}>
             <Card className="border-none bg-card shadow-soft rounded-[2.5rem] overflow-hidden h-full">
               <CardHeader className="p-8">
                 <CardTitle className="text-xl font-black italic flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-amber-500 fill-amber-500" /> Hot Articles
+                  <TrendingUp className="w-5 h-5 text-emerald-500" /> Popular Pages
                 </CardTitle>
-                <CardDescription>Berita dengan interaksi tertinggi</CardDescription>
+                <CardDescription>Halaman yang paling sering dikunjungi</CardDescription>
               </CardHeader>
               <CardContent className="px-8 pb-8 pt-0">
-                <div className="space-y-6">
-                  {popularBerita.length > 0 ? popularBerita.map((berita: any, idx: number) => (
-                    <div key={berita.id} className="group flex items-center gap-4 cursor-pointer">
-                      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-muted flex-shrink-0 shadow-soft">
-                        <img
-                          src={getImageUrl(berita.image)}
-                          alt={berita.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-black/20" />
-                        <div className="absolute top-1 left-1 w-5 h-5 bg-white/90 rounded-lg flex items-center justify-center text-[10px] font-black text-primary border border-primary/20">
+                <div className="space-y-4">
+                  {analyticsData?.topPages?.map((page: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 hover:bg-primary/5 transition-all group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center font-black text-xs text-primary shadow-soft">
                           {idx + 1}
                         </div>
+                        <span className="text-xs font-bold text-slate-800 line-clamp-1">{page.path}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{berita.title}</h4>
-                        <div className="flex items-center gap-3 mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                          <span className="flex items-center gap-1"><Eye className="w-3 h-3 text-primary" /> {berita.views}</span>
-                          <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-primary" /> 2h ago</span>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/10 hover:text-primary transition-colors">
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Button>
+                      <Badge variant="secondary" className="bg-white/80 font-black text-[10px] text-primary">
+                        {page.count} <Eye className="w-2.5 h-2.5 ml-1" />
+                      </Badge>
                     </div>
-                  )) : (
-                    <div className="text-center py-20 text-muted-foreground font-medium italic">
-                      No data available
-                    </div>
-                  )}
+                  ))}
                 </div>
-
-                <Button variant="outline" className="w-full mt-8 rounded-2xl h-12 border-dashed font-bold uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white transition-all">
-                  View All News Reports
-                </Button>
               </CardContent>
             </Card>
           </motion.div>
@@ -300,7 +353,7 @@ const AdminDashboard = () => {
           </div>
         </motion.div>
       </motion.div>
-    </AdminLayout>
+    </AdminLayout >
   );
 };
 
