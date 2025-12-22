@@ -138,7 +138,7 @@ const PrestasiDetail = () => {
                                     <img
                                         src={getImageUrl(achievement.image)}
                                         alt={achievement.title}
-                                        className="w-full object-cover aspect-video group-hover:scale-105 transition-transform duration-[3s]"
+                                        className="w-full object-cover aspect-video group-hover:scale-105 transition-transform duration-[3000ms]"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent" />
                                 </div>

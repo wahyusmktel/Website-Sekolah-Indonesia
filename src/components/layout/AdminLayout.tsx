@@ -1,16 +1,26 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info, FileText } from "lucide-react";
-import { motion } from "framer-motion";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users, Handshake, Monitor, Mail, Info, FileText, Settings, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
+import { format } from "date-fns";
+import { toast } from "sonner";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
@@ -30,14 +40,44 @@ const menuItems = [
   { icon: Mail, label: "Pesan Masuk", href: "/admin/messages" },
   { icon: FileText, label: "Manajemen PPDB", href: "/admin/ppdb" },
   { icon: Info, label: "Info Kontak", href: "/admin/contact-info" },
+  { icon: Settings, label: "Pengaturan Web", href: "/admin/settings" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
 ];
 
-export function AdminLayout({ children }: { children: ReactNode }) {
+export function AdminLayout({ children, title }: { children: ReactNode, title?: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: settings } = useSiteSettings();
+
+  // Fetch messages for notifications
+  const { data: messages } = useQuery({
+    queryKey: ['admin-messages'],
+    queryFn: () => apiClient.get('/messages').then(res => res.data),
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const unreadMessages = messages?.filter((m: any) => m.is_read === 0) || [];
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: number) => apiClient.patch(`/messages/${id}/read`, { is_read: 1 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-messages'] });
+    }
+  });
+
+  const markAllAsRead = async () => {
+    try {
+      await Promise.all(unreadMessages.map((m: any) => markAsReadMutation.mutateAsync(m.id)));
+      toast.success("Semua pesan ditandai telah dibaca");
+    } catch (error) {
+      toast.error("Gagal memperbarui status pesan");
+    }
+  };
+
+  const schoolName = settings?.school_name || "Sekolah Nusantara";
 
   const handleLogout = () => {
     localStorage.removeItem("adminAuth");
@@ -60,8 +100,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             {sidebarOpen && (
               <div className="flex flex-col">
-                <span className="font-black text-slate-800 tracking-tight leading-none uppercase text-lg">Sekolah</span>
-                <span className="text-[10px] font-black tracking-[0.2em] text-primary uppercase">Nusantara</span>
+                <span className="font-black text-slate-800 tracking-tight leading-none uppercase text-lg truncate max-w-[150px]">
+                  {schoolName.split(' ')[0]}
+                </span>
+                <span className="text-[10px] font-black tracking-[0.2em] text-primary uppercase truncate max-w-[150px]">
+                  {schoolName.split(' ').slice(1).join(' ')}
+                </span>
               </div>
             )}
           </div>
@@ -154,6 +198,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             >
               <Menu className="w-5 h-5" />
             </Button>
+
+            {title && (
+              <div className="hidden lg:flex flex-col">
+                <h2 className="text-sm font-black uppercase tracking-widest text-slate-800 italic">{title}</h2>
+                <div className="h-1 w-8 bg-primary rounded-full mt-0.5" />
+              </div>
+            )}
             <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100 w-80 group focus-within:ring-2 focus-within:ring-primary/20 transition-all">
               <Search className="w-4 h-4 text-slate-400" />
               <input
@@ -166,10 +217,85 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="rounded-xl text-slate-600 hover:bg-slate-50 relative h-11 w-11">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-3 right-3 w-1.5 h-1.5 bg-red-500 rounded-full ring-4 ring-white" />
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-xl text-slate-600 hover:bg-slate-50 relative h-11 w-11 shadow-sm border border-slate-100">
+                    <Bell className="w-5 h-5" />
+                    {unreadMessages.length > 0 && (
+                      <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-red-500 text-[10px] font-black text-white flex items-center justify-center rounded-full ring-2 ring-white">
+                        {unreadMessages.length > 9 ? '9+' : unreadMessages.length}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96 p-0 border-none shadow-2xl rounded-[2rem] overflow-hidden" align="end" sideOffset={15}>
+                  <div className="bg-slate-900 p-6 text-white">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-black italic uppercase tracking-widest text-sm">Notifications</h3>
+                      <span className="text-[10px] font-black px-2 py-0.5 bg-primary rounded-full uppercase tracking-tighter italic">Live</span>
+                    </div>
+                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+                      {unreadMessages.length} Pesan Baru Belum Dibaca
+                    </p>
+                  </div>
+
+                  <ScrollArea className="max-h-[400px]">
+                    <div className="p-2 space-y-1">
+                      {unreadMessages.length === 0 ? (
+                        <div className="py-12 flex flex-col items-center justify-center text-center px-6">
+                          <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center mb-4">
+                            <Check className="w-8 h-8 text-slate-300" />
+                          </div>
+                          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Tidak ada pesan baru</p>
+                        </div>
+                      ) : (
+                        unreadMessages.map((msg: any) => (
+                          <div key={msg.id} className="group p-4 rounded-2xl hover:bg-slate-50 transition-all flex gap-4 border border-transparent hover:border-slate-100 relative">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 font-black text-xs">
+                              {msg.name.charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs font-black text-slate-800 truncate uppercase tracking-tight">{msg.name}</p>
+                                <span className="text-[9px] font-bold text-slate-400">{format(new Date(msg.created_at), 'HH:mm')}</span>
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-600 line-clamp-1 italic">"{msg.subject}"</p>
+                              <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">{msg.message}</p>
+                            </div>
+                            <button
+                              onClick={() => markAsReadMutation.mutate(msg.id)}
+                              className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center hover:scale-110 transition-all shadow-lg shadow-emerald-500/20"
+                              title="Tandai dibaca"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+
+                  {unreadMessages.length > 0 && (
+                    <div className="p-4 border-t border-slate-50 bg-slate-50/50">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={markAllAsRead}
+                        className="w-full rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2"
+                      >
+                        Tandai Semua Telah Dibaca
+                        <Check className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="p-4 bg-slate-50/30">
+                    <Button variant="link" className="w-full text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors" asChild>
+                      <Link to="/admin/messages">Lihat Semua Pesan</Link>
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-xl text-slate-600 hover:bg-slate-50 h-11 w-11" asChild>
@@ -186,7 +312,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             <div className="h-8 w-px bg-slate-100 mx-2" />
             <div className="text-right hidden sm:block">
               <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic">Active Session</p>
-              <p className="text-xs font-bold text-slate-600">SMK Nusantara Portal</p>
+              <p className="text-xs font-bold text-slate-600">{schoolName} Portal</p>
             </div>
           </div>
         </header>

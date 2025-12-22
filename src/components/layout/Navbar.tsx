@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { Helmet } from "react-helmet-async";
 
 const navLinks = [
   { name: "Beranda", href: "/" },
@@ -31,6 +33,13 @@ export function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const location = useLocation();
+  const { data: settings } = useSiteSettings();
+
+  const schoolName = settings?.school_name || "SMK Nusantara";
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL?.replace('/api', '');
+  const schoolLogo = settings?.school_logo ? `${baseUrl}${settings.school_logo}` : null;
+  const seoKeywords = settings?.seo_keywords || "";
+  const seoDescription = settings?.seo_description || "";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,13 +69,25 @@ export function Navbar() {
           : "bg-transparent py-6"
       )}
     >
+      <Helmet>
+        <title>{schoolName} | Website Resmi</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={seoKeywords} />
+        <meta property="og:title" content={`${schoolName} | Website Resmi`} />
+        <meta property="og:description" content={seoDescription} />
+        {schoolLogo && <meta property="og:image" content={schoolLogo} />}
+      </Helmet>
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-4 group">
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-elevated">
-                <span className="text-background font-black text-2xl">N</span>
+              <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-elevated overflow-hidden">
+                {schoolLogo ? (
+                  <img src={schoolLogo} alt={schoolName} className="w-full h-full object-contain p-2" />
+                ) : (
+                  <span className="text-background font-black text-2xl">{schoolName.charAt(0)}</span>
+                )}
               </div>
               <motion.div
                 animate={{ rotate: 360 }}
@@ -78,16 +99,16 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className={cn(
-                "font-black text-2xl tracking-tighter leading-none transition-colors",
+                "font-black text-2xl tracking-tighter leading-none transition-colors max-w-[200px] truncate",
                 isScrolled ? "text-foreground" : "text-white"
               )}>
-                SMK <span className="text-primary italic">N</span>
+                {schoolName.split(' ')[0]} <span className="text-primary italic">{schoolName.split(' ')[1]?.charAt(0)}</span>
               </span>
               <span className={cn(
-                "text-[10px] font-black uppercase tracking-[0.3em] ml-1",
+                "text-[10px] font-black uppercase tracking-[0.3em] ml-1 truncate max-w-[150px]",
                 isScrolled ? "text-muted-foreground" : "text-white/60"
               )}>
-                Nusantara
+                {schoolName.split(' ').slice(1).join(' ')}
               </span>
             </div>
           </Link>

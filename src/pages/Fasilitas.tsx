@@ -112,7 +112,7 @@ const Fasilitas = () => {
                                                 <img
                                                     src={getImageUrl(facility.image)}
                                                     alt={facility.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3000ms]"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
                                                 <div className="absolute bottom-8 left-8">
@@ -194,7 +194,7 @@ const Fasilitas = () => {
                                     <div className="aspect-square rounded-[3rem] overflow-hidden border border-white/10">
                                         <img
                                             src="https://images.unsplash.com/photo-1541339907198-e08756dee9b8?auto=format&fit=crop&q=80&w=800"
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5s]"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5000ms]"
                                             alt="Facility highlight"
                                         />
                                     </div>

@@ -321,7 +321,7 @@ const PPDB = () => {
                   <div className="aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl relative group">
                     <img
                       src="https://images.unsplash.com/photo-1523050335456-c3cc73c68326?auto=format&fit=crop&q=80&w=1200"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms]"
                       alt="Student success"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground via-transparent to-transparent opacity-60" />

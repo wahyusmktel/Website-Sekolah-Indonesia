@@ -3,9 +3,15 @@ import { Facebook, Instagram, Youtube, Twitter, Mail, Phone, MapPin, Sparkles } 
 import { infoSekolah } from "@/lib/dummy-data";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useSiteSettings();
+
+  const schoolName = settings?.school_name || "SMK Nusantara";
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL?.replace('/api', '');
+  const schoolLogo = settings?.school_logo ? `${baseUrl}${settings.school_logo}` : null;
 
   return (
     <footer className="bg-foreground text-background relative overflow-hidden">
@@ -19,15 +25,19 @@ export function Footer() {
           {/* About */}
           <div className="space-y-8">
             <Link to="/" className="flex items-center gap-4 group">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-glow">
-                <span className="text-foreground font-black text-2xl">N</span>
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-glow overflow-hidden">
+                {schoolLogo ? (
+                  <img src={schoolLogo} alt={schoolName} className="w-full h-full object-contain p-2" />
+                ) : (
+                  <span className="text-foreground font-black text-2xl">{schoolName.charAt(0)}</span>
+                )}
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-2xl tracking-tighter leading-none text-white">
-                  SMK <span className="text-primary italic">N</span>
+                <span className="font-black text-2xl tracking-tighter leading-none text-white max-w-[200px] truncate">
+                  {schoolName.split(' ')[0]} <span className="text-primary italic">{schoolName.split(' ')[1]?.charAt(0)}</span>
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                  Nusantara
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 truncate max-w-[150px]">
+                  {schoolName.split(' ').slice(1).join(' ')}
                 </span>
               </div>
             </Link>
@@ -125,7 +135,7 @@ export function Footer() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em]">
-              © {currentYear} {infoSekolah.nama}. Crafted with <span className="text-primary">♥</span> and Code.
+              © {currentYear} {schoolName}. Crafted with <span className="text-primary">♥</span> and Code.
             </p>
             <div className="flex gap-8">
               <Link to="/admin/login" className="text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-[0.2em]">

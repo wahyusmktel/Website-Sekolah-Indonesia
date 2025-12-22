@@ -1479,6 +1479,42 @@ app.put('/api/ppdb-info', async (req, res) => {
     }
 });
 
+
+// -- SITE SETTINGS ROUTES --
+app.get('/api/settings', async (req, res) => {
+    try {
+        const [rows]: any = await pool.query('SELECT * FROM site_settings LIMIT 1');
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.json({});
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching settings', error });
+    }
+});
+
+app.put('/api/settings', async (req, res) => {
+    const { school_name, school_logo, seo_keywords, seo_description } = req.body;
+    try {
+        const [rows]: any = await pool.query('SELECT id FROM site_settings LIMIT 1');
+        if (rows.length > 0) {
+            await pool.query(
+                'UPDATE site_settings SET school_name = ?, school_logo = ?, seo_keywords = ?, seo_description = ? WHERE id = ?',
+                [school_name, school_logo, seo_keywords, seo_description, rows[0].id]
+            );
+        } else {
+            await pool.query(
+                'INSERT INTO site_settings (school_name, school_logo, seo_keywords, seo_description) VALUES (?, ?, ?, ?)',
+                [school_name, school_logo, seo_keywords, seo_description]
+            );
+        }
+        res.json({ message: 'Settings updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating settings', error });
+    }
+});
+
 // -- GLOBAL ERROR HANDLER --
 app.use((err: any, req: any, res: any, next: any) => {
     console.error('Unhandled Error:', err);
