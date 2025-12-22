@@ -1,30 +1,87 @@
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import {
-    Users, UserCheck, ShieldCheck, Briefcase,
-    GraduationCap, ChevronDown, Sparkles
+    Users, ShieldCheck, Briefcase, GraduationCap, Sparkles,
+    ArrowRight, GitCommit, Settings, Database, Server
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { strukturOrganisasi } from "@/lib/dummy-data";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getImageUrl } from "@/lib/image-utils";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
+interface Member {
+    id: number;
+    name: string;
+    role: string;
+    image: string;
+    type: string;
+    description?: string;
+    parent_id?: number | null;
+    connection_type?: 'subordinate' | 'coordination';
+}
+
+const MemberCard = ({ member, size = "md", dark = false }: { member: Member, size?: "sm" | "md" | "lg", dark?: boolean }) => (
+    <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        className={`relative group ${size === 'lg' ? 'max-w-sm' : size === 'md' ? 'max-w-[280px]' : 'max-w-[220px]'} w-full`}
+    >
+        <div className={`relative p-6 rounded-[2rem] ${dark ? 'bg-foreground border-white/10' : 'bg-white border-primary/20'} border-2 backdrop-blur-xl text-center shadow-lg transition-all duration-500 hover:shadow-primary/20`}>
+            <div className={`${size === 'lg' ? 'w-24 h-24' : 'w-16 h-16'} rounded-2xl overflow-hidden mx-auto mb-4 border-2 ${dark ? 'border-primary/50' : 'border-primary/20'}`}>
+                <img src={getImageUrl(member.image)} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            </div>
+            <Badge className={`mb-2 rounded-full ${dark ? 'bg-primary' : 'bg-primary/10 text-primary'} border-none py-0.5 px-3 text-[8px] font-black uppercase tracking-widest`}>
+                {member.role}
+            </Badge>
+            <h3 className={`font-bold ${size === 'lg' ? 'text-lg' : 'text-sm'} ${dark ? 'text-white' : 'text-foreground'} leading-tight italic`}>
+                {member.name}
+            </h3>
+            {member.description && size === 'lg' && (
+                <p className="mt-3 text-white/40 text-[10px] italic leading-relaxed">"{member.description}"</p>
+            )}
+        </div>
+    </motion.div>
+);
 
 const StrukturOrganisasi = () => {
-    const { kepalaSekolah, wakilKepalaSekolah, ketuaJurusan } = strukturOrganisasi;
+    const [members, setMembers] = useState<Member[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.2
+    useEffect(() => {
+        const fetchStruktur = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/struktur");
+                setMembers(response.data);
+            } catch (error) {
+                console.error("Error fetching struktur:", error);
+            } finally {
+                setLoading(false);
             }
-        }
-    };
+        };
+        fetchStruktur();
+    }, []);
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
-    };
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-foreground">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    // Helper to get children
+    const getChildren = (parentId: number) => members.filter(m => m.parent_id === parentId && m.connection_type !== 'coordination');
+    const getCoordinations = (parentId: number) => members.filter(m => m.parent_id === parentId && m.connection_type === 'coordination');
+
+    const kepsek = members.find(m => m.type === 'kepala_sekolah');
+    const komite = getCoordinations(kepsek?.id || 0).find(m => m.type === 'komite_sekolah');
+    const quality = getCoordinations(kepsek?.id || 0).find(m => m.role.includes('Quality'));
+    const kaAdmin = getChildren(kepsek?.id || 0).find(m => m.type === 'kepala_administrasi');
+    const wakas = members.filter(m => m.type === 'wakil_kepala_sekolah');
 
     return (
         <>
@@ -50,118 +107,105 @@ const StrukturOrganisasi = () => {
                         >
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-8">
                                 <Users className="w-4 h-4 text-primary" />
-                                <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.2em]">Leadership Team</span>
+                                <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.2em]">Leadership Tree</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-tight italic">
                                 STRUKTUR <span className="text-primary text-stroke-white">ORGANISASI</span>
                             </h1>
-                            <p className="text-white/40 text-xl font-light leading-relaxed mb-6 italic">
+                            <p className="text-white/40 text-xl font-light leading-relaxed italic">
                                 Sinergi kepemimpinan yang berfokus pada inovasi pendidikan dan pengembangan karakter siswa.
                             </p>
                         </motion.div>
                     </div>
                 </section>
 
-                {/* Hierarchy Section */}
+                {/* complex Tree Section */}
                 <section className="py-24 bg-background relative overflow-hidden">
                     <div className="container mx-auto px-4">
 
-                        {/* 1. KEPALA SEKOLAH (THE TOP) */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="flex justify-center mb-24 relative"
-                        >
-                            <div className="absolute top-full left-1/2 w-px h-24 bg-gradient-to-b from-primary to-transparent -translate-x-1/2 hidden lg:block" />
-                            <div className="relative group max-w-sm w-full">
-                                <div className="absolute inset-0 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-700" />
-                                <div className="relative p-10 rounded-[3rem] bg-white dark:bg-foreground/5 border-2 border-primary/50 backdrop-blur-xl text-center shadow-glow">
-                                    <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden mx-auto mb-6 border-4 border-primary/20">
-                                        <img src={kepalaSekolah.image} alt={kepalaSekolah.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        {/* 1. TOP TIER (Komite - kepsek - KaAdmin) */}
+                        <div className="flex flex-col items-center mb-32">
+                            <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 relative">
+                                {/* Coordination Lines (Desktop) */}
+                                <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent hidden lg:block -translate-y-1/2" />
+
+                                {komite && (
+                                    <div className="relative z-10">
+                                        <MemberCard member={komite} dark />
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-primary mt-4 flex items-center justify-center gap-2">
+                                            <GitCommit className="w-3 h-3" /> Garis Koordinasi
+                                        </div>
                                     </div>
-                                    <Badge className="mb-4 rounded-full bg-primary py-1 px-4 text-[10px] font-black uppercase tracking-widest">{kepalaSekolah.role}</Badge>
-                                    <h3 className="text-2xl font-black text-foreground mb-4 tracking-tight italic">{kepalaSekolah.name}</h3>
-                                    <p className="text-muted-foreground text-sm font-light italic leading-relaxed">
-                                        "{kepalaSekolah.description}"
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
+                                )}
 
-                        {/* 2. WAKIL KEPALA SEKOLAH (THE MIDDLE) */}
-                        <div className="mb-32">
-                            <div className="text-center mb-16">
-                                <div className="inline-flex items-center gap-2 text-primary mb-4">
-                                    <ShieldCheck className="w-5 h-5" />
-                                    <span className="text-xs font-black uppercase tracking-[0.3em]">Vice Principals</span>
-                                </div>
-                                <h2 className="text-3xl font-black italic tracking-tighter">Jajaran Wakil Kepala Sekolah</h2>
-                            </div>
-
-                            <motion.div
-                                variants={containerVariants}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-                            >
-                                {wakilKepalaSekolah.map((waka, i) => (
-                                    <motion.div
-                                        key={i}
-                                        variants={itemVariants}
-                                        className="p-8 rounded-[2.5rem] bg-white dark:bg-foreground/5 border border-border hover:border-primary/50 transition-all duration-500 text-center group shadow-soft"
-                                    >
-                                        <div className="w-24 h-24 rounded-2xl overflow-hidden mx-auto mb-6 grayscale group-hover:grayscale-0 transition-all duration-700 mt-2">
-                                            <img src={waka.image} alt={waka.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                {kepsek && (
+                                    <div className="relative z-10">
+                                        <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
+                                        <MemberCard member={kepsek} size="lg" />
+                                        <div className="mt-8 flex justify-center">
+                                            <div className="w-px h-16 bg-gradient-to-b from-primary to-transparent" />
                                         </div>
-                                        <Badge variant="outline" className="mb-4 rounded-full border-primary/20 text-primary text-[8px] font-black uppercase tracking-widest">{waka.role}</Badge>
-                                        <h4 className="text-lg font-black tracking-tight mb-2 italic">{waka.name}</h4>
-                                    </motion.div>
-                                ))}
-                            </motion.div>
+                                    </div>
+                                )}
+
+                                {kaAdmin && (
+                                    <div className="relative z-10">
+                                        <MemberCard member={kaAdmin} dark />
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-primary mt-4 flex items-center justify-center gap-2">
+                                            <ArrowRight className="w-3 h-3" /> Garis Instruksi
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Under Ka Admin */}
+                            {kaAdmin && (
+                                <div className="mt-12 flex flex-wrap justify-center gap-6">
+                                    {getChildren(kaAdmin.id).map(kaur => (
+                                        <div key={kaur.id} className="relative pt-12">
+                                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-12 bg-border" />
+                                            <MemberCard member={kaur} size="sm" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Quality Development (Single below/aside) */}
+                            {quality && (
+                                <div className="mt-16 flex flex-col items-center">
+                                    <div className="w-px h-12 bg-primary/20" />
+                                    <MemberCard member={quality} size="sm" dark />
+                                </div>
+                            )}
                         </div>
 
-                        {/* 3. KETUA JURUSAN (THE DEPT HEADS) */}
-                        <div>
-                            <div className="text-center mb-16">
-                                <div className="inline-flex items-center gap-2 text-primary mb-4">
-                                    <Briefcase className="w-5 h-5" />
-                                    <span className="text-xs font-black uppercase tracking-[0.3em]">Department Heads</span>
-                                </div>
-                                <h2 className="text-3xl font-black italic tracking-tighter">Ketua Program Keahlian</h2>
-                            </div>
+                        {/* 2. WAKA TIER */}
+                        <div className="space-y-32">
+                            {wakas.map((waka) => (
+                                <div key={waka.id} className="flex flex-col items-center">
+                                    <div className="text-center mb-12">
+                                        <MemberCard member={waka} size="md" />
+                                        <div className="mt-8 flex justify-center">
+                                            <div className="w-px h-12 bg-primary/30" />
+                                        </div>
+                                    </div>
 
-                            <motion.div
-                                variants={containerVariants}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-                            >
-                                {ketuaJurusan.map((kajur, i) => (
-                                    <motion.div
-                                        key={i}
-                                        variants={itemVariants}
-                                        className="group p-8 rounded-[2.5rem] bg-foreground/5 dark:bg-white/5 border border-border hover:bg-foreground transition-all duration-500"
-                                    >
-                                        <div className="flex items-center gap-6 mb-6">
-                                            <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 border-2 border-transparent group-hover:border-primary transition-colors">
-                                                <img src={kajur.image} alt={kajur.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0" />
+                                    {/* Sub-roles under Waka */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+                                        {/* Connecting Line (Desktop) */}
+                                        <div className="absolute top-0 left-4 right-4 h-px bg-border hidden lg:block" />
+
+                                        {getChildren(waka.id).map(sub => (
+                                            <div key={sub.id} className="relative pt-8 flex flex-col items-center">
+                                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-8 bg-border hidden lg:block" />
+                                                <MemberCard member={sub} size="sm" />
                                             </div>
-                                            <div className="text-left">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-primary block mb-1">{kajur.role}</span>
-                                                <h4 className="font-bold text-foreground group-hover:text-white transition-colors leading-tight italic">{kajur.name}</h4>
-                                            </div>
-                                        </div>
-                                        <div className="pt-6 border-t border-border/10 flex items-center justify-between">
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-white/40">Expertise Verified</span>
-                                            <GraduationCap className="w-4 h-4 text-primary opacity-20 group-hover:opacity-100" />
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
+
                     </div>
                 </section>
 
@@ -174,28 +218,133 @@ const StrukturOrganisasi = () => {
                             </div>
                             <div className="grid md:grid-cols-2 gap-16 items-center">
                                 <div>
-                                    <h2 className="text-4xl font-black text-white italic tracking-tighter leading-none mb-8">
-                                        Komitmen <br /> <span className="text-primary tracking-widest uppercase text-base not-italic font-black">Management System</span>
+                                    <h2 className="text-3xl font-black text-white italic tracking-tighter leading-none mb-8 uppercase">
+                                        Core <br /> <span className="text-primary tracking-widest uppercase text-base not-italic font-black">Management System</span>
                                     </h2>
                                     <p className="text-white/40 text-lg font-light leading-relaxed italic mb-8">
-                                        "Kepemimpinan di SMK Nusantara berlandaskan pada transparansi dan orientasi hasil, memastikan setiap instruksi kurikulum tersampaikan dengan presisi tinggi ke setiap ruang kelas."
+                                        "Setiap struktur memiliki tanggung jawab yang terintegrasi, memastikan operasional sekolah berjalan sesuai standar keunggulan Nusantara."
                                     </p>
                                 </div>
                                 <div className="space-y-6">
                                     {[
-                                        "Integrasi Kurikulum Industri 100%",
-                                        "Sistem Monitoring Pembelajaran Real-time",
-                                        "Pengembangan Talent Guru & Staff Berkelanjutan",
-                                        "Standarisasi Manajemen Mutu ISO 9001:2015"
+                                        "Sinergi Antar Departemen",
+                                        "Transparansi Alur Koordinasi",
+                                        "Akuntabilitas Kinerja Staf",
+                                        "Fokus Pengembangan Prestasi"
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-center gap-4 text-white/80">
                                             <div className="w-2 h-2 rounded-full bg-primary" />
-                                            <span className="text-sm font-bold tracking-tight uppercase tracking-[0.1em]">{item}</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.2em]">{item}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </section>
+                {/* CTA Section to Guru */}
+                <section className="pt-32 pb-40 bg-background relative overflow-hidden">
+                    {/* Background Decorative Elements */}
+                    <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+                        <motion.div
+                            animate={{
+                                rotate: [0, 360],
+                                scale: [1, 1.2, 1]
+                            }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute -top-24 -left-24 w-96 h-96 border-[40px] border-primary/10 rounded-full"
+                        />
+                        <motion.div
+                            animate={{
+                                y: [0, 50, 0],
+                                rotate: [0, -45, 0]
+                            }}
+                            transition={{ duration: 15, repeat: Infinity }}
+                            className="absolute top-1/2 -right-24 w-64 h-64 border-2 border-primary/20 rotate-45"
+                        />
+                    </div>
+
+                    <div className="container mx-auto px-4 relative z-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="p-16 lg:p-24 rounded-[5rem] bg-foreground text-center relative overflow-hidden shadow-soft"
+                        >
+                            {/* Inner Geometric Shapes */}
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                <motion.div
+                                    animate={{
+                                        x: [-20, 20, -20],
+                                        y: [-20, 20, -20]
+                                    }}
+                                    transition={{ duration: 10, repeat: Infinity }}
+                                    className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/20 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"
+                                />
+                                <div className="absolute inset-0 opacity-[0.03] bg-[url('/grid.svg')] bg-center group-hover:opacity-[0.05] transition-opacity" />
+
+                                {/* Floating Geometric Particles */}
+                                {[...Array(3)].map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        animate={{
+                                            y: [0, -30, 0],
+                                            opacity: [0.1, 0.3, 0.1],
+                                            rotate: [0, 180, 360]
+                                        }}
+                                        transition={{
+                                            duration: 5 + i * 2,
+                                            repeat: Infinity,
+                                            delay: i
+                                        }}
+                                        className="absolute hidden lg:block"
+                                        style={{
+                                            top: `${20 + i * 30}%`,
+                                            left: `${10 + i * 40}%`,
+                                            width: '40px',
+                                            height: '40px',
+                                            border: '2px solid rgba(var(--primary), 0.2)',
+                                            borderRadius: i % 2 === 0 ? '50%' : '8px'
+                                        }}
+                                    />
+                                ))}
+                            </div>
+
+                            <div className="relative z-10 max-w-3xl mx-auto">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8"
+                                >
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Professional Team</span>
+                                </motion.div>
+
+                                <h2 className="text-5xl md:text-7xl font-black text-white italic mb-8 uppercase leading-[0.9] tracking-tighter">
+                                    Kenali <span className="text-primary text-stroke-white transition-all duration-500 hover:text-white">Tenaga Pendidik?</span>
+                                </h2>
+                                <p className="text-white/40 text-lg md:text-xl mb-12 italic font-light leading-relaxed max-w-2xl mx-auto">
+                                    "Dibalik manajemen yang kuat, terdapat jajaran guru profesional yang siap membimbing langkah Anda menuju masa depan cemerlang."
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                                    <Button asChild size="lg" className="rounded-2xl bg-primary hover:bg-primary-dark font-black tracking-widest px-12 py-8 h-auto shadow-glow transition-all hover:scale-105 active:scale-95">
+                                        <Link to="/tentang-kami/guru" className="flex gap-4 items-center uppercase tracking-widest">
+                                            <GraduationCap className="w-6 h-6" />
+                                            LIHAT DAFTAR GURU
+                                        </Link>
+                                    </Button>
+                                    <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/5">
+                                        <div className="flex -space-x-3">
+                                            {[1, 2, 3].map(i => (
+                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-foreground bg-muted/20" />
+                                            ))}
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">50+ Expert Teachers</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </section>
             </PublicLayout>

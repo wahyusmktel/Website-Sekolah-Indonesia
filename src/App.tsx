@@ -20,6 +20,7 @@ import Kontak from "./pages/Kontak";
 import PPDB from "./pages/PPDB";
 import Prestasi from "./pages/Prestasi";
 import PrestasiDetail from "./pages/PrestasiDetail";
+import Guru from "./pages/Guru";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/Login";
@@ -34,6 +35,10 @@ import AdminHero from "./pages/admin/Hero";
 import AdminKeunggulan from "./pages/admin/Keunggulan";
 import AdminSambutan from "./pages/admin/Sambutan";
 import AdminStatistik from "./pages/admin/Statistik";
+import AdminProfil from "./pages/admin/Profil";
+import AdminStruktur from "./pages/admin/Struktur";
+import AdminGuru from "./pages/admin/Guru";
+import AdminFasilitas from "./pages/admin/Fasilitas";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -53,9 +58,10 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/profil" element={<Profil />} />
-            <Route path="/struktur-organisasi" element={<StrukturOrganisasi />} />
             <Route path="/fasilitas" element={<Fasilitas />} />
             <Route path="/hubungan-industri" element={<HubunganIndustri />} />
+            <Route path="/tentang-kami/guru" element={<Guru />} />
+            <Route path="/tentang-kami/struktur-organisasi" element={<StrukturOrganisasi />} />
             <Route path="/program" element={<Program />} />
             <Route path="/berita" element={<Berita />} />
             <Route path="/berita/:slug" element={<BeritaDetail />} />
@@ -83,6 +89,10 @@ const App = () => (
               <Route path="/admin/keunggulan" element={<AdminKeunggulan />} />
               <Route path="/admin/sambutan" element={<AdminSambutan />} />
               <Route path="/admin/statistik" element={<AdminStatistik />} />
+              <Route path="/admin/profil" element={<AdminProfil />} />
+              <Route path="/admin/struktur" element={<AdminStruktur />} />
+              <Route path="/admin/guru" element={<AdminGuru />} />
+              <Route path="/admin/fasilitas" element={<AdminFasilitas />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

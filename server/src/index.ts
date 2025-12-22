@@ -67,6 +67,7 @@ app.get('/api/stats', async (req, res) => {
         const [[{ counts: keunggulan }]] = await pool.query('SELECT COUNT(*) as counts FROM keunggulan') as any;
         const [[{ counts: sambutan }]] = await pool.query('SELECT COUNT(*) as counts FROM sambutan') as any;
         const [[{ counts: statistik }]] = await pool.query('SELECT COUNT(*) as counts FROM statistik') as any;
+        const [[{ counts: fasilitas }]] = await pool.query('SELECT COUNT(*) as counts FROM fasilitas') as any;
 
         // Try to get specific "siswa" count from statistik table if it exists
         const [siswaRows]: any = await pool.query('SELECT value FROM statistik WHERE label LIKE "%Siswa%" LIMIT 1');
@@ -82,6 +83,7 @@ app.get('/api/stats', async (req, res) => {
             keunggulan,
             sambutan,
             statistik,
+            fasilitas,
             siswa: siswaValue,
         });
     } catch (error) {
@@ -639,6 +641,292 @@ app.post('/api/login', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Login error', error });
+    }
+});
+
+// Profil Sekolah Routes
+app.get('/api/profil', async (req, res) => {
+    try {
+        const [profilRows]: any = await pool.query('SELECT * FROM profil_sekolah LIMIT 1');
+        const [misiRows]: any = await pool.query('SELECT * FROM misi_items ORDER BY id ASC');
+        const [sejarahRows]: any = await pool.query('SELECT * FROM sejarah ORDER BY year ASC');
+
+        const dummyProfil = {
+            hero_title: "Dedikasi Untuk Masa Depan",
+            hero_subtitle: "Edukasi Berkualitas Dunia",
+            hero_description: "Menjelajahi identitas SMK Nusantara sebagai pelopor pendidikan vokasi modern yang menggabungkan keahlian industri dengan karakter unggul.",
+            visi_title: "Visi Utama",
+            visi_content: "Menjadi epicenter pendidikan kejuruan yang menghasilkan pemimpin masa depan berkarakter global, kompeten secara teknis, dan memiliki jiwa inovator yang berdaya saing internasional.",
+            misi_title: "Misi Strategis"
+        };
+
+        const dummyMisi = [
+            { id: 1, content: "Menyelenggarakan kurikulum berbasis industri terkini." },
+            { id: 2, content: "Membangun ekosistem pendidikan karakter yang inklusif." },
+            { id: 3, content: "Memperluas jejaring strategis dengan korporasi global." },
+            { id: 4, content: "Mendorong budaya riset dan inovasi teknologi terapan." }
+        ];
+
+        const dummySejarah = [
+            {
+                id: 1,
+                year: "1995",
+                title: "Era Perintisan",
+                description: "Dimulai sebagai STM Nusantara dengan fokus pada teknik mesin dan otomotif. Membangun fondasi pendidikan vokasi yang disiplin."
+            },
+            {
+                id: 2,
+                year: "2005",
+                title: "Transformasi Digital Pertama",
+                description: "Berubah nama menjadi SMK Nusantara and membuka departemen Teknologi Informasi, merespon revolusi digital awal di Indonesia."
+            },
+            {
+                id: 3,
+                year: "2024",
+                title: "Global Leadership",
+                description: "Kini mengelola 6 program keahlian bertaraf internasional dengan kemitraan lebih dari 100 perusahaan global."
+            }
+        ];
+
+        res.json({
+            profil: profilRows.length > 0 ? profilRows[0] : dummyProfil,
+            misi: misiRows.length > 0 ? misiRows : dummyMisi,
+            sejarah: sejarahRows.length > 0 ? sejarahRows : dummySejarah
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching profil data', error });
+    }
+});
+
+app.put('/api/profil', async (req, res) => {
+    const { hero_title, hero_subtitle, hero_description, visi_title, visi_content, misi_title } = req.body;
+    try {
+        const [rows]: any = await pool.query('SELECT id FROM profil_sekolah LIMIT 1');
+        if (rows.length > 0) {
+            await pool.query(
+                'UPDATE profil_sekolah SET hero_title = ?, hero_subtitle = ?, hero_description = ?, visi_title = ?, visi_content = ?, misi_title = ? WHERE id = ?',
+                [hero_title, hero_subtitle, hero_description, visi_title, visi_content, misi_title, rows[0].id]
+            );
+        } else {
+            await pool.query(
+                'INSERT INTO profil_sekolah (hero_title, hero_subtitle, hero_description, visi_title, visi_content, misi_title) VALUES (?, ?, ?, ?, ?, ?)',
+                [hero_title, hero_subtitle, hero_description, visi_title, visi_content, misi_title]
+            );
+        }
+        res.json({ message: 'Profil updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating profil', error });
+    }
+});
+
+// Misi Items Routes
+app.post('/api/misi', async (req, res) => {
+    const { content } = req.body;
+    try {
+        const [result] = await pool.query('INSERT INTO misi_items (content) VALUES (?)', [content]);
+        res.status(201).json({ id: (result as any).insertId, content });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating misi item', error });
+    }
+});
+
+app.put('/api/misi/:id', async (req, res) => {
+    const { id } = req.params;
+    const { content } = req.body;
+    try {
+        await pool.query('UPDATE misi_items SET content = ? WHERE id = ?', [content, id]);
+        res.json({ message: 'Misi item updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating misi item', error });
+    }
+});
+
+app.delete('/api/misi/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM misi_items WHERE id = ?', [id]);
+        res.json({ message: 'Misi item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting misi item', error });
+    }
+});
+
+// Sejarah Routes
+app.post('/api/sejarah', async (req, res) => {
+    const { year, title, description } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO sejarah (year, title, description) VALUES (?, ?, ?)',
+            [year, title, description]
+        );
+        res.status(201).json({ id: (result as any).insertId, year, title, description });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating sejarah entry', error });
+    }
+});
+
+app.put('/api/sejarah/:id', async (req, res) => {
+    const { id } = req.params;
+    const { year, title, description } = req.body;
+    try {
+        await pool.query(
+            'UPDATE sejarah SET year = ?, title = ?, description = ? WHERE id = ?',
+            [year, title, description, id]
+        );
+        res.json({ message: 'Sejarah entry updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating sejarah entry', error });
+    }
+});
+
+app.delete('/api/sejarah/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM sejarah WHERE id = ?', [id]);
+        res.json({ message: 'Sejarah entry deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting sejarah entry', error });
+    }
+});
+
+// Struktur Organisasi Routes
+app.get('/api/struktur', async (req, res) => {
+    try {
+        const [rows]: any = await pool.query('SELECT * FROM struktur_organisasi ORDER BY order_priority ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching struktur data', error });
+    }
+});
+
+app.post('/api/struktur', async (req, res) => {
+    const { name, role, image, type, description, order_priority, parent_id, connection_type } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO struktur_organisasi (name, role, image, type, description, order_priority, parent_id, connection_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, role, image, type, description || null, order_priority || 0, parent_id || null, connection_type || 'subordinate']
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating struktur item', error });
+    }
+});
+
+app.put('/api/struktur/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, role, image, type, description, order_priority, parent_id, connection_type } = req.body;
+    try {
+        await pool.query(
+            'UPDATE struktur_organisasi SET name = ?, role = ?, image = ?, type = ?, description = ?, order_priority = ?, parent_id = ?, connection_type = ? WHERE id = ?',
+            [name, role, image, type, description || null, order_priority || 0, parent_id || null, connection_type || 'subordinate', id]
+        );
+        res.json({ message: 'Struktur item updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating struktur item', error });
+    }
+});
+
+app.delete('/api/struktur/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM struktur_organisasi WHERE id = ?', [id]);
+        res.json({ message: 'Struktur item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting struktur item', error });
+    }
+});
+
+// Guru Routes
+app.get('/api/guru', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM guru ORDER BY order_priority ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching guru data', error });
+    }
+});
+
+app.post('/api/guru', async (req, res) => {
+    const { name, subject, image, bio, education, experience, instagram_url, linkedin_url, order_priority, is_pioneer } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO guru (name, subject, image, bio, education, experience, instagram_url, linkedin_url, order_priority, is_pioneer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, subject, image, bio || null, education || null, experience || null, instagram_url || null, linkedin_url || null, order_priority || 0, is_pioneer || false]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating guru item', error });
+    }
+});
+
+app.put('/api/guru/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, subject, image, bio, education, experience, instagram_url, linkedin_url, order_priority, is_pioneer } = req.body;
+    try {
+        await pool.query(
+            'UPDATE guru SET name = ?, subject = ?, image = ?, bio = ?, education = ?, experience = ?, instagram_url = ?, linkedin_url = ?, order_priority = ?, is_pioneer = ? WHERE id = ?',
+            [name, subject, image, bio || null, education || null, experience || null, instagram_url || null, linkedin_url || null, order_priority || 0, is_pioneer || false, id]
+        );
+        res.json({ message: 'Guru item updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating guru item', error });
+    }
+});
+
+app.delete('/api/guru/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM guru WHERE id = ?', [id]);
+        res.json({ message: 'Guru item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting guru item', error });
+    }
+});
+
+// Fasilitas Routes
+app.get('/api/fasilitas', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM fasilitas ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching fasilitas data', error });
+    }
+});
+
+app.post('/api/fasilitas', async (req, res) => {
+    const { title, description, features, image, icon } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO fasilitas (title, description, features, image, icon) VALUES (?, ?, ?, ?, ?)',
+            [title, description, JSON.stringify(features), image, icon]
+        );
+        res.status(201).json({ id: (result as any).insertId, ...req.body });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating fasilitas item', error });
+    }
+});
+
+app.put('/api/fasilitas/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, description, features, image, icon } = req.body;
+    try {
+        await pool.query(
+            'UPDATE fasilitas SET title = ?, description = ?, features = ?, image = ?, icon = ? WHERE id = ?',
+            [title, description, JSON.stringify(features), image, icon, id]
+        );
+        res.json({ message: 'Fasilitas item updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating fasilitas item', error });
+    }
+});
+
+app.delete('/api/fasilitas/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM fasilitas WHERE id = ?', [id]);
+        res.json({ message: 'Fasilitas item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting fasilitas item', error });
     }
 });
 

@@ -1,9 +1,105 @@
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { Target, Eye, History, Sparkles, BookOpen, Users, Rocket, Trophy, CheckCircle2 } from "lucide-react";
+import { Target, Eye, History, Sparkles, BookOpen, Users, Rocket, Trophy, CheckCircle2, GraduationCap, Building, Briefcase, Award, Heart } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+interface ProfilData {
+  hero_title: string;
+  hero_subtitle: string;
+  hero_description: string;
+  visi_title: string;
+  visi_content: string;
+  misi_title: string;
+}
+
+interface MisiItem {
+  id: number;
+  content: string;
+}
+
+interface SejarahEntry {
+  id: number;
+  year: string;
+  title: string;
+  description: string;
+}
+
+interface KeunggulanItem {
+  id: number;
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface SambutanData {
+  principal_name: string;
+  principal_role: string;
+  principal_image: string;
+  title: string;
+  greeting: string;
+  content: string;
+  quote_footer: string;
+}
+
+const iconMap: Record<string, any> = {
+  Users,
+  BookOpen,
+  Rocket,
+  Trophy,
+  Target,
+  Eye,
+  History,
+  Sparkles,
+  CheckCircle2,
+  GraduationCap,
+  Building,
+  Briefcase,
+  Award,
+  Heart
+};
 
 const Profil = () => {
+  const [profil, setProfil] = useState<ProfilData | null>(null);
+  const [misi, setMisi] = useState<MisiItem[]>([]);
+  const [sejarah, setSejarah] = useState<SejarahEntry[]>([]);
+  const [keunggulan, setKeunggulan] = useState<KeunggulanItem[]>([]);
+  const [sambutan, setSambutan] = useState<SambutanData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [profilRes, keunggulanRes, sambutanRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/profil"),
+          axios.get("http://localhost:5000/api/keunggulan"),
+          axios.get("http://localhost:5000/api/sambutan"),
+        ]);
+
+        setProfil(profilRes.data.profil);
+        setMisi(profilRes.data.misi);
+        setSejarah(profilRes.data.sejarah);
+        setKeunggulan(keunggulanRes.data);
+        setSambutan(sambutanRes.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-foreground">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Helmet>
@@ -13,7 +109,6 @@ const Profil = () => {
       <PublicLayout>
         {/* Modern Hero Section */}
         <section className="relative pt-40 pb-24 overflow-hidden bg-foreground">
-          {/* Geometric Background Elements */}
           <div className="absolute inset-0 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -39,21 +134,20 @@ const Profil = () => {
               >
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary-light text-xs font-black uppercase tracking-widest mb-8">
                   <Sparkles className="w-4 h-4" />
-                  Edukasi Berkualitas Dunia
+                  {profil?.hero_subtitle}
                 </div>
                 <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-[1.1] tracking-tight">
-                  Dedikasi Untuk <br />
-                  <span className="text-primary italic">Masa Depan</span>
+                  {profil?.hero_title}
                 </h1>
                 <p className="text-white/60 text-xl font-light max-w-2xl mx-auto leading-relaxed">
-                  Menjelajahi identitas SMK Nusantara sebagai pelopor pendidikan vokasi modern yang menggabungkan keahlian industri dengan karakter unggul.
+                  {profil?.hero_description}
                 </p>
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Vision & Mission - Glassmorphism Style */}
+        {/* Vision & Mission */}
         <section className="py-32 relative overflow-hidden">
           <div className="container mx-auto px-4 relative z-10">
             <div className="grid lg:grid-cols-2 gap-12">
@@ -67,14 +161,12 @@ const Profil = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-[3rem] blur opacity-0 group-hover:opacity-100 transition duration-500" />
                 <div className="relative h-full bg-white dark:bg-foreground/5 backdrop-blur-xl rounded-[3.5rem] p-12 lg:p-16 border border-border group-hover:border-primary/20 transition-all duration-500 overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-
                   <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center mb-10 shadow-glow rotate-3 group-hover:rotate-6 transition-transform">
                     <Eye className="w-10 h-10 text-white" />
                   </div>
-
-                  <h2 className="text-4xl font-black text-foreground mb-6 tracking-tight">Visi <span className="text-primary">Utama</span></h2>
+                  <h2 className="text-4xl font-black text-foreground mb-6 tracking-tight">{profil?.visi_title}</h2>
                   <p className="text-muted-foreground text-xl font-light leading-relaxed">
-                    Menjadi epicenter pendidikan kejuruan yang menghasilkan pemimpin masa depan berkarakter global, kompeten secara teknis, dan memiliki jiwa inovator yang berdaya saing internasional.
+                    {profil?.visi_content}
                   </p>
                 </div>
               </motion.div>
@@ -89,24 +181,17 @@ const Profil = () => {
                 <div className="absolute -inset-1 bg-gradient-to-l from-primary/20 to-transparent rounded-[3rem] blur opacity-0 group-hover:opacity-100 transition duration-500" />
                 <div className="relative h-full bg-white dark:bg-foreground/5 backdrop-blur-xl rounded-[3.5rem] p-12 lg:p-16 border border-border group-hover:border-primary/20 transition-all duration-500 overflow-hidden">
                   <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 -translate-x-1/2" />
-
                   <div className="w-20 h-20 rounded-3xl bg-foreground dark:bg-primary flex items-center justify-center mb-10 shadow-elevated -rotate-3 group-hover:-rotate-6 transition-transform">
                     <Target className="w-10 h-10 text-white" />
                   </div>
-
-                  <h2 className="text-4xl font-black text-foreground mb-8 tracking-tight">Misi <span className="text-primary italic">Strategis</span></h2>
+                  <h2 className="text-4xl font-black text-foreground mb-8 tracking-tight">{profil?.misi_title}</h2>
                   <div className="space-y-6">
-                    {[
-                      "Menyelenggarakan kurikulum berbasis industri terkini.",
-                      "Membangun ekosistem pendidikan karakter yang inklusif.",
-                      "Memperluas jejaring strategis dengan korporasi global.",
-                      "Mendorong budaya riset dan inovasi teknologi terapan."
-                    ].map((misi, i) => (
-                      <div key={i} className="flex gap-4 items-start">
+                    {misi.map((item, i) => (
+                      <div key={item.id} className="flex gap-4 items-start">
                         <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shrink-0 mt-1">
                           0{i + 1}
                         </div>
-                        <p className="text-muted-foreground text-lg font-light leading-tight">{misi}</p>
+                        <p className="text-muted-foreground text-lg font-light leading-tight">{item.content}</p>
                       </div>
                     ))}
                   </div>
@@ -125,8 +210,25 @@ const Profil = () => {
               <p className="text-white/40 text-lg">Nilai-nilai inti yang membentuk DNA pendidikan kami</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+              {keunggulan.map((item, i) => {
+                const IconComponent = (iconMap as any)[item.icon] || Sparkles;
+                const colors = ["text-blue-400", "text-red-400", "text-emerald-400", "text-amber-400", "text-purple-400", "text-pink-400"];
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="bg-white/5 border border-white/10 rounded-[2rem] p-8 text-center hover:bg-white/10 transition-colors cursor-default"
+                  >
+                    <IconComponent className={`w-12 h-12 mx-auto mb-4 ${colors[i % colors.length]}`} />
+                    <p className="text-white font-black uppercase tracking-widest text-[10px] mb-2">{item.title}</p>
+                    <p className="text-white/40 text-[10px] leading-tight line-clamp-2">{item.description}</p>
+                  </motion.div>
+                );
+              })}
+              {keunggulan.length === 0 && [
                 { icon: Users, label: "Community", color: "text-blue-400" },
                 { icon: BookOpen, label: "Integrity", color: "text-red-400" },
                 { icon: Rocket, label: "Innovation", color: "text-emerald-400" },
@@ -147,7 +249,7 @@ const Profil = () => {
           </div>
         </section>
 
-        {/* History Timeline - Enhanced */}
+        {/* History Timeline */}
         <section className="py-32 bg-white dark:bg-foreground/[0.02]">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
@@ -157,34 +259,16 @@ const Profil = () => {
                 </div>
                 <div>
                   <h2 className="text-4xl font-black text-foreground">Jejak Perjalanan</h2>
-                  <p className="text-muted-foreground text-lg italic">Transformasi tanpa henti sejak 1995</p>
+                  <p className="text-muted-foreground text-lg italic">Transformasi tanpa henti</p>
                 </div>
                 <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-border to-transparent" />
               </div>
 
               <div className="relative space-y-24">
-                {/* Vertical Line */}
                 <div className="absolute left-[31px] top-0 bottom-0 w-px bg-gradient-to-b from-primary via-primary/20 to-transparent" />
-
-                {[
-                  {
-                    year: "1995",
-                    title: "Era Perintisan",
-                    desc: "Dimulai sebagai STM Nusantara dengan fokus pada teknik mesin dan otomotif. Membangun fondasi pendidikan vokasi yang disiplin."
-                  },
-                  {
-                    year: "2005",
-                    title: "Transformasi Digital Pertama",
-                    desc: "Berubah nama menjadi SMK Nusantara dan membuka departemen Teknologi Informasi, merespon revolusi digital awal di Indonesia."
-                  },
-                  {
-                    year: "2024",
-                    title: "Global Leadership",
-                    desc: "Kini mengelola 6 program keahlian bertaraf internasional dengan kemitraan lebih dari 100 perusahaan global."
-                  }
-                ].map((item, i) => (
+                {sejarah.map((item, i) => (
                   <motion.div
-                    key={i}
+                    key={item.id}
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -196,7 +280,7 @@ const Profil = () => {
                     <div className="pt-2">
                       <span className="text-primary font-black text-2xl mb-2 block">{item.year}</span>
                       <h3 className="text-3xl font-black text-foreground mb-4 leading-tight">{item.title}</h3>
-                      <p className="text-muted-foreground text-xl font-light leading-relaxed max-w-2xl">{item.desc}</p>
+                      <p className="text-muted-foreground text-xl font-light leading-relaxed max-w-2xl">{item.description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -205,9 +289,8 @@ const Profil = () => {
           </div>
         </section>
 
-        {/* Principal Message - Modern Section */}
+        {/* Principal Message */}
         <section className="py-32 bg-foreground relative overflow-hidden">
-          {/* Decorative Background */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-1/2 left-0 w-full h-px bg-primary" />
             <div className="absolute top-0 left-1/2 w-px h-full bg-primary" />
@@ -226,14 +309,14 @@ const Profil = () => {
                     <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full" />
                     <div className="relative rounded-[3rem] overflow-hidden aspect-[4/5] shadow-glow">
                       <img
-                        src="https://images.unsplash.com/photo-1519085115824-2a5a1bcbb9e6?auto=format&fit=crop&q=80&w=800"
+                        src={sambutan?.principal_image || "https://images.unsplash.com/photo-1519085115824-2a5a1bcbb9e6?auto=format&fit=crop&q=80&w=800"}
                         alt="Principal"
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                       <div className="absolute bottom-10 left-10 text-white">
-                        <p className="font-black text-2xl">Drs. H. Mulyadi, M.Pd.</p>
-                        <p className="text-primary font-bold text-xs uppercase tracking-widest mt-1">Chief Visionary Officer</p>
+                        <p className="font-black text-2xl">{sambutan?.principal_name}</p>
+                        <p className="text-primary font-bold text-xs uppercase tracking-widest mt-1">{sambutan?.principal_role}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -244,15 +327,15 @@ const Profil = () => {
                     <Sparkles className="w-8 h-8" />
                   </div>
                   <h2 className="text-white text-5xl font-black leading-tight tracking-tight">
-                    Pesan Untuk <br /> <span className="text-primary italic">Generasi Penerus</span>
+                    {sambutan?.title}
                   </h2>
                   <div className="space-y-6">
-                    <p className="text-white/60 text-xl font-light leading-relaxed">
-                      "Pendidikan bukan sekadar transfer ilmu, melainkan proses penempaan karakter dan mentalitas kompetitif. Di SMK Nusantara, kami mendesain ekosistem di mana setiap siswa ditantang untuk melampaui batas kemampuan mereka."
+                    <p className="text-white/60 text-xl font-light leading-relaxed whitespace-pre-line">
+                      {sambutan?.greeting} {sambutan?.content}
                     </p>
-                    <p className="text-white/60 text-xl font-light leading-relaxed">
-                      "Teknologi akan terus berubah, namun karakter yang kuat adalah aset yang tidak akan pernah usang. Kami bangga dapat menjadi bagian dari perjalanan Anda menuju kesuksesan di panggung global."
-                    </p>
+                    {sambutan?.quote_footer && (
+                      <p className="text-primary font-bold">{sambutan.quote_footer}</p>
+                    )}
                   </div>
 
                   <div className="pt-8 flex items-center gap-6">

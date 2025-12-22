@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy } from "lucide-react";
+import { LayoutDashboard, Newspaper, Calendar, GraduationCap, Image, LogOut, Menu, User, Bell, Search, Sparkles, MessageSquareQuote, Award, Quote, Trophy, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,16 @@ import { Button } from "@/components/ui/button";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },
   { icon: Newspaper, label: "Berita", href: "/admin/berita" },
+  { icon: User, label: "Profil Sekolah", href: "/admin/profil" },
+  { icon: Users, label: "Struktur Organisasi", href: "/admin/struktur" },
+  { icon: GraduationCap, label: "Manajemen Guru", href: "/admin/guru" },
   { icon: Sparkles, label: "Hero Slider", href: "/admin/hero" },
   { icon: Award, label: "Keunggulan", href: "/admin/keunggulan" },
   { icon: Quote, label: "Sambutan", href: "/admin/sambutan" },
   { icon: Trophy, label: "Statistik", href: "/admin/statistik" },
   { icon: Calendar, label: "Agenda", href: "/admin/agenda" },
   { icon: GraduationCap, label: "Program", href: "/admin/program" },
+  { icon: LayoutDashboard, label: "Fasilitas Sekolah", href: "/admin/fasilitas" },
   { icon: Image, label: "Galeri & Album", href: "/admin/galeri" },
   { icon: MessageSquareQuote, label: "Testimoni", href: "/admin/testimoni" },
 ];

@@ -6,16 +6,52 @@ import {
     Sparkles, ArrowRight, Building2
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { fasilitasSekolah } from "@/lib/dummy-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getImageUrl } from "@/lib/image-utils";
+
+interface Facility {
+    id: number;
+    title: string;
+    description: string;
+    features: string[];
+    image: string;
+    icon: string;
+}
 
 const iconMap: Record<string, any> = {
     Monitor, Cpu, Layers, BookOpen, Activity, Coffee
 };
 
 const Fasilitas = () => {
+    const [facilities, setFacilities] = useState<Facility[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFacilities = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/fasilitas");
+                setFacilities(response.data);
+            } catch (error) {
+                console.error("Error fetching facilities:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchFacilities();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-foreground">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+            </div>
+        );
+    }
+
     return (
         <>
             <Helmet>
@@ -56,7 +92,7 @@ const Fasilitas = () => {
                 <section className="py-24 bg-background">
                     <div className="container mx-auto px-4">
                         <div className="space-y-40">
-                            {fasilitasSekolah.map((facility, index) => {
+                            {facilities.map((facility, index) => {
                                 const Icon = iconMap[facility.icon] || Monitor;
                                 const isEven = index % 2 === 0;
 
@@ -74,7 +110,7 @@ const Fasilitas = () => {
                                             <div className="absolute -inset-4 bg-primary/10 rounded-[3rem] blur-2xl group-hover:bg-primary/20 transition-all duration-700 -z-10" />
                                             <div className="rounded-[3rem] overflow-hidden border border-border shadow-elevated aspect-[4/3] relative">
                                                 <img
-                                                    src={facility.image}
+                                                    src={getImageUrl(facility.image)}
                                                     alt={facility.title}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"
                                                 />
@@ -95,7 +131,7 @@ const Fasilitas = () => {
                                         {/* Content Side */}
                                         <div className="flex-1 space-y-8">
                                             <Badge variant="outline" className="rounded-full border-primary/20 text-primary px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em]">
-                                                Facility 0{facility.id}
+                                                Facility 0{index + 1}
                                             </Badge>
                                             <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tighter italic">
                                                 {facility.title}
@@ -105,12 +141,18 @@ const Fasilitas = () => {
                                             </p>
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                {facility.features.map((feature, i) => (
-                                                    <div key={i} className="flex items-center gap-3 group/feat">
-                                                        <CheckCircle2 className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                                                        <span className="text-sm font-bold tracking-tight text-foreground/80">{feature}</span>
-                                                    </div>
-                                                ))}
+                                                {(() => {
+                                                    const features = Array.isArray(facility.features)
+                                                        ? facility.features
+                                                        : (typeof facility.features === 'string' ? JSON.parse(facility.features || '[]') : []);
+
+                                                    return features.map((feature: string, i: number) => (
+                                                        <div key={i} className="flex items-center gap-3 group/feat">
+                                                            <CheckCircle2 className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                                                            <span className="text-sm font-bold tracking-tight text-foreground/80">{feature}</span>
+                                                        </div>
+                                                    ));
+                                                })()}
                                             </div>
 
                                             <div className="pt-8">

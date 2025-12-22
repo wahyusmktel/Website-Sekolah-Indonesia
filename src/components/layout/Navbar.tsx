@@ -12,7 +12,8 @@ const navLinks = [
     href: "#",
     submenu: [
       { name: "Profil", href: "/profil" },
-      { name: "Struktur Organisasi", href: "/struktur-organisasi" },
+      { name: "Guru & Tenaga Ahli", href: "/tentang-kami/guru" },
+      { name: "Struktur Organisasi", href: "/tentang-kami/struktur-organisasi" },
       { name: "Fasilitas", href: "/fasilitas" },
       { name: "Hubungan Industri", href: "/hubungan-industri" },
     ]
