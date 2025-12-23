@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCP Deployment Guide - Website Sekolah Indonesia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e11d48;
+            --primary-dark: #be123c;
+            --secondary: #1e293b;
+            --accent: #f43f5e;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        aside h2 {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: block;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem 5rem;
+            max-width: 1100px;
+        }
+
+        header {
+            margin-bottom: 4rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 1.5rem;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 2.5rem 0 1.25rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--text-main);
+        }
+
+        ul,
+        ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        code.inline {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary-dark);
+        }
+
+        /* Code Blocks */
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: var(--code-bg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        pre {
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        code.block {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        /* Note components */
+        .note {
+            background: #fefce8;
+            border-left: 4px solid #eab308;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 2rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .note::before {
+            content: "⚠️";
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            aside {
+                display: none;
+            }
+
+            main {
+                margin-left: 0;
+                padding: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <aside>
+            <h2>Navigasi</h2>
+            <ul class="nav-links">
+                <li><a href="#prasyarat">0. Prasyarat</a></li>
+                <li><a href="#bagian1">1. Persiapan GCP</a></li>
+                <li><a href="#bagian2">2. Setup Server</a></li>
+                <li><a href="#bagian3">3. Deploy Aplikasi</a></li>
+                <li><a href="#bagian4">4. Setup PM2</a></li>
+                <li><a href="#bagian5">5. Setup Nginx</a></li>
+                <li><a href="#bagian6">6. Setup CORS</a></li>
+                <li><a href="#bagian7">7. SSL/HTTPS</a></li>
+                <li><a href="#bagian8">8. Testing</a></li>
+                <li><a href="#bagian9">9. Maintenance</a></li>
+                <li><a href="#bagian10">10. Troubleshooting</a></li>
+                <li><a href="#bagian11">11. Cloudflare Tunnel</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <header>
+                <h1>🚀 Deployment Guide</h1>
+                <p>Panduan lengkap untuk men-deploy Website Sekolah Indonesia ke Google Cloud Platform (GCP).</p>
+            </header>
+
+            <section id="prasyarat">
+                <h2>Prasyarat</h2>
+                <p>Pastikan komponen berikut sudah tersedia sebelum memulai:</p>
+                <ul>
+                    <li>Akun <strong>Google Cloud</strong> dengan billing aktif.</li>
+                    <li><strong>Google Cloud SDK</strong> terinstal di lokal.</li>
+                    <li>Kunci <strong>SSH</strong> untuk akses server.</li>
+                    <li><strong>Repo Git</strong> yang siap di-clone.</li>
+                </ul>
+            </section>
+
+            <section id="bagian1">
+                <h2>1. Persiapan GCP</h2>
+                <h3>1.1 Setup Project</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>Terminal Lokal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Login & Create Project
+gcloud auth login
+gcloud projects create website-sekolah --name="Website Sekolah"
+gcloud config set project website-sekolah
+
+# Enable APIs
+gcloud services enable compute.googleapis.com sqladmin.googleapis.com</code></pre>
+                </div>
+
+                <h3>1.2 VM Instance</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>Terminal Lokal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">gcloud compute instances create sekolah-server \
+    --zone=asia-southeast2-a \
+    --machine-type=e2-medium \
+    --image-family=ubuntu-2204-lts \
+    --image-project=ubuntu-os-cloud \
+    --tags=http-server,https-server</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian2">
+                <h2>2. Setup Server</h2>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># SSH ke Instance
+gcloud compute ssh sekolah-server --zone=asia-southeast2-a
+
+# Install Essentials
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y nodejs npm git nginx mysql-server
+sudo npm install -g pm2</code></pre>
+                </div>
+
+                <h3>2.3 Database Setup</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>MySQL</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">CREATE DATABASE `website-sekolah-indonesia`;
+CREATE USER 'sekolah_user'@'localhost' IDENTIFIED BY 'PASSWORD_ANDA';
+GRANT ALL PRIVILEGES ON `website-sekolah-indonesia`.* TO 'sekolah_user'@'localhost';
+FLUSH PRIVILEGES;</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian3">
+                <h2>3. Deploy Aplikasi</h2>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">cd /var/www
+sudo git clone https://github.com/wahyusmktel/Website-Sekolah-Indonesia.git
+cd Website-Sekolah-Indonesia/server
+npm install --production</code></pre>
+                </div>
+
+                <h3>3.2 Environment Variables</h3>
+                <p>Buat file <code class="inline">.env</code> di dalam folder server:</p>
+                <div class="code-container">
+                    <div class="code-header"><span>.env</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">PORT=5000
+DB_HOST=localhost
+DB_USER=sekolah_user
+DB_PASS=PASSWORD_ANDA
+DB_NAME=website-sekolah-indonesia
+JWT_SECRET=HASIL_GENERATE_RANDOM
+CLIENT_URL=http://IP_ATAU_DOMAIN</code></pre>
+                </div>
+
+                <h3>3.3 Migrasi & Seeder</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian4">
+                <h2>4. Setup PM2</h2>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">pm2 start src/index.ts --name "sekolah-backend" --interpreter ts-node
+pm2 save
+pm2 startup</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian5">
+                <h2>5. Setup Nginx</h2>
+                <p>Nginx digunakan sebagai reverse proxy untuk mengarahkan traffic port 80 ke backend (5000) dan static
+                    files.</p>
+                <div class="code-container">
+                    <div class="code-header"><span>nginx config</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">server {
+    listen 80;
+    server_name YOUR_DOMAIN_OR_IP;
+
+    location / {
+        root /var/www/Website-Sekolah-Indonesia/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /uploads/ {
+        alias /var/www/Website-Sekolah-Indonesia/server/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian6">
+                <h2>6. Setup CORS</h2>
+                <p>Pastikan backend mengizinkan permintaan dari domain Anda.</p>
+                <div class="code-container">
+                    <div class="code-header"><span>server/src/index.ts</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://YOUR_DOMAIN_OR_IP',
+    'https://YOUR_DOMAIN_OR_IP'
+].filter(Boolean);</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian7">
+                <h2>7. SSL/HTTPS (Certbot)</h2>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Install Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# Dapatkan SSL
+sudo certbot --nginx -d domainanda.com</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian8">
+                <h2>8. Testing</h2>
+                <ul>
+                    <li>Cek akses: <code class="inline">http://YOUR_IP</code></li>
+                    <li>Cek API: <code class="inline">http://YOUR_IP/api/stats</code></li>
+                    <li>Cek Admin: <code class="inline">/admin/login</code></li>
+                </ul>
+            </section>
+
+            <section id="bagian9">
+                <h2>9. Maintenance</h2>
+                <h3>Update Code</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">git pull origin main
+cd server && npm install
+npm run build
+pm2 restart sekolah-backend</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian10">
+                <h2>10. Troubleshooting</h2>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Cek Logs Backend
+pm2 logs sekolah-backend
+
+# Cek Logs Nginx
+sudo tail -f /var/log/nginx/error.log</code></pre>
+                </div>
+            </section>
+
+            <section id="bagian11">
+                <h2>11. Cloudflare Tunnel</h2>
+                <p>Gunakan Cloudflare Tunnel untuk menghubungkan server lokal/GCP ke domain tanpa membuka port publik.
+                </p>
+
+                <h3>11.1 Install Cloudflared</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Download cloudflared
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+
+# Install package
+sudo dpkg -i cloudflared.deb</code></pre>
+                </div>
+
+                <h3>11.2 Autentikasi & Create Tunnel</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Login ke Cloudflare (Klik link yang muncul)
+cloudflared tunnel login
+
+# Buat tunnel baru
+cloudflared tunnel create sekolah-tunnel</code></pre>
+                </div>
+
+                <h3>11.3 Konfigurasi Ingress</h3>
+                <p>Buat file konfigurasi <code class="inline">~/.cloudflared/config.yml</code>:</p>
+                <div class="code-container">
+                    <div class="code-header"><span>config.yml</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block">tunnel: [TUNNEL_ID_ANDA]
+credentials-file: /home/ubuntu/.cloudflared/[TUNNEL_ID_ANDA].json
+
+ingress:
+  - hostname: sekolah.domainanda.com
+    service: http://localhost:80
+  - service: http_status:404</code></pre>
+                </div>
+
+                <h3>11.4 Route DNS & Run</h3>
+                <div class="code-container">
+                    <div class="code-header"><span>SSH Terminal</span><button class="copy-btn"
+                            onclick="copyCode(this)">Salin</button></div>
+                    <pre><code class="block"># Hubungkan hostname ke tunnel
+cloudflared tunnel route dns sekolah-tunnel sekolah.domainanda.com
+
+# Jalankan tunnel sebagai service
+sudo cloudflared service install
+sudo systemctl start cloudflared
+sudo systemctl enable cloudflared</code></pre>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function copyCode(btn) {
+            const container = btn.closest('.code-container');
+            const code = container.querySelector('code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Tersalin!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
