@@ -26,6 +26,8 @@ app.use(helmet({
 // 2. CORS configuration
 const allowedOrigins = [
     process.env.CLIENT_URL,
+    'https://site.smktelkom-lpg.id',
+    'http://site.smktelkom-lpg.id',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:8080',
@@ -212,12 +214,12 @@ app.post('/api/upload-multiple', authMiddleware, upload.array('images', 20), (re
     const urls = files.map(file => `/uploads/${file.filename}`);
     res.json({ urls });
 });
+
 // Basic Route
 app.get('/', (req, res) => {
-    res.send('School Website API with Enhanced Security is running...');
+    res.send('School Website API is running...');
 });
 
-// -- AUTH ROUTES --
 app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
     try {
