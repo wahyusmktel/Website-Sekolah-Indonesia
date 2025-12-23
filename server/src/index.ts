@@ -44,13 +44,25 @@ app.use(cors({
     credentials: true
 }));
 
-// 3. Rate Limiting to prevent brute force
-const limiter = rateLimit({
+// 3. Rate Limiting
+// Stricter limit for login/auth routes to prevent brute force
+const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again after 15 minutes'
+    max: 20, // Limit each IP to 20 attempts per 15 minutes
+    message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit'
 });
-app.use('/api/', limiter);
+
+// General limit for other API routes (relaxed for better UX during content management)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // Increased to 1000 requests per 15 minutes
+    message: 'Terlalu banyak permintaan dari IP ini, silakan coba lagi setelah 15 menit',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.use('/api/auth/', authLimiter);
+app.use('/api/', apiLimiter);
 
 // 4. HPP - HTTP Parameter Pollution protection
 app.use(hpp());
